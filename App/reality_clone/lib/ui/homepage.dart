@@ -42,16 +42,16 @@ class _HomePageState extends State<HomePage> {
           itemBuilder: (context, index) {
             return Card(
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(8),
               ),
-              elevation: 4,
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              elevation: 0,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(15)),
+                      borderRadius: BorderRadius.circular(8),
                       child: Image.asset(
                         items[index]['image']!,
                         fit: BoxFit.cover,
