@@ -18,7 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue[50],
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0),
@@ -27,17 +27,17 @@ class _LoginPageState extends State<LoginPage> {
             children: [
               CircleAvatar(
                 radius: 50,
-                backgroundColor: Colors.blue[100],
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 child: Icon(
                   Icons.person,
                   size: 50,
-                  color: Colors.blue[800],
+                  color: Theme.of(context).colorScheme.onPrimary,
                 ),
               ),
               const SizedBox(height: 30),
               TextField(
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.person, color: Colors.blue),
+                  prefixIcon: Icon(Icons.person, color: Theme.of(context).colorScheme.primary),
                   labelText: 'Username',
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -48,11 +48,11 @@ class _LoginPageState extends State<LoginPage> {
               TextField(
                 obscureText: _obscureText,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.lock, color: Colors.blue),
+                  prefixIcon: Icon(Icons.lock, color: Theme.of(context).colorScheme.primary),
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscureText ? Icons.visibility_off : Icons.visibility,
-                      color: Colors.blue,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                     onPressed: _togglePasswordVisibility,
                   ),
@@ -64,9 +64,11 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pushNamed(context, '/');
+                },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue[800],
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 70,
                     vertical: 15,
