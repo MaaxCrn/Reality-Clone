@@ -23,7 +23,9 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.more_vert),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/setting');
+            },
           ),
         ],
       ),
@@ -83,7 +85,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Ajouter une action ici
+          Navigator.pushNamed(context, '/picture');
         },
         child: const Icon(Icons.add),
       ),

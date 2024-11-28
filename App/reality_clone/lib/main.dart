@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:reality_clone/theme/app_theme.dart';
 import 'package:reality_clone/ui/homepage.dart';
 import 'package:reality_clone/ui/loginpage.dart';
+import 'package:reality_clone/ui/picturepage.dart';
+import 'package:reality_clone/ui/settingpage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,6 +22,9 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => HomePage(),
         '/login': (context) => LoginPage(),
+        '/setting': (context) => SettingsPage(),
+        '/picture': (context) => PicturePage(),
+
       },
       //home: LoginPage(),
       theme: materialTheme.light(),
