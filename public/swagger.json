@@ -27,19 +27,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"properties": {
-										"filePath": {
-											"type": "string"
-										},
-										"message": {
-											"type": "string"
-										}
-									},
-									"required": [
-										"filePath",
-										"message"
-									],
-									"type": "object"
+									"type": "string"
 								}
 							}
 						}
