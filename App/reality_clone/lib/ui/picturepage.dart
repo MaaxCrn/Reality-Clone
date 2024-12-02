@@ -28,10 +28,6 @@ class _ARPageState extends State<ARPage> {
   late ARSessionManager arSessionManager;
   late ARObjectManager arObjectManager;
 
-  late CameraController _cameraController;
-  List<CameraDescription> _cameras = [];
-  CameraDescription? _camera;
-
   List<CapturedPhoto> capturedPhotos = [];
   int _photoCount = 0;
   GlobalKey _repaintKey = GlobalKey();
@@ -39,56 +35,67 @@ class _ARPageState extends State<ARPage> {
   @override
   void dispose() {
     arSessionManager.dispose();
-    _initializeCamera();
     super.dispose();
   }
 
-  Future<void> _initializeCamera() async {
-    _cameras = await availableCameras();
-
-    _camera = _cameras.firstWhere(
-          (camera) => camera.lensDirection == CameraLensDirection.back,
-      orElse: () => _cameras.first,
-    );
-
-    _cameraController = CameraController(
-      _camera!,
-      ResolutionPreset.high,
-    );
-
-    await _cameraController.initialize();
-
-    _getCameraInfo();
+  @override
+  void initState() {
+    super.initState();
   }
 
-  Future<void> _getCameraInfo() async {
+  Future<void> getCameraInfo() async {
     try {
-      final cameraId = 1;
-      final model = _camera?.lensDirection.toString() ?? 'Unknown';
-      final width = _cameraController.value.previewSize?.width ?? 0.0;
-      final height = _cameraController.value.previewSize?.height ?? 0.0;
+      final cameras = await availableCameras();
+      final firstCamera = cameras.first;
 
-      debugPrint('Camera ID: $cameraId');
-      debugPrint('Camera Model: $model');
-      debugPrint('Camera Width: $width');
-      debugPrint('Camera Height: $height');
+      const cameraId = 1;
+      final model = firstCamera.lensDirection.toString();
 
+      final CameraController cameraController = CameraController(
+        firstCamera,
+        ResolutionPreset.low,
+      );
+
+      await cameraController.initialize();
+
+      final size = cameraController.value.previewSize;
+      final width = size?.width ?? 0.0;
+      final height = size?.height ?? 0.0;
+
+      StringBuffer dataBuffer = StringBuffer();
+      dataBuffer.write('$cameraId '
+          '$model '
+          '$width '
+          '$height\n');
+
+      final directory = await getExternalStorageDirectory();
+      if (directory == null) {
+        print("Error: Unable to access external storage");
+        return;
+      }
+
+      final downloadDirectory = Directory('${directory.path}/Download');
+      if (!await downloadDirectory.exists()) {
+        await downloadDirectory.create(recursive: true);
+      }
+
+      final filePath = '${downloadDirectory.path}/camera_${DateTime.now().millisecondsSinceEpoch}.txt';
+      final file = File(filePath);
+
+      await file.writeAsString(dataBuffer.toString());
+
+      print('Camera info saved to $filePath');
+
+      await cameraController.dispose();
     } catch (e) {
-      debugPrint('Error retrieving camera info: $e');
+      print('Error retrieving camera info: $e');
     }
   }
 
   Future<void> _capturePhotosWithPositions() async {
-    int photosToCapture =
-        50 + (100 - 50) * (DateTime.now().millisecondsSinceEpoch % 50) ~/ 50;
-
-    for (int i = 0; i < 1; i++) {
       final position = await _getCameraPosition();
       await _takeScreenshot(position);
-
       await Future.delayed(const Duration(seconds: 1));
-    }
-    debugPrint('Captured $photosToCapture photos.');
   }
 
   Future<Map<String, double>> _getCameraPosition() async {
@@ -179,16 +186,16 @@ class _ARPageState extends State<ARPage> {
         String cameraId = '1';
         String imageName = photo.name;
 
-        dataBuffer.write('$imageId,'
-            '${quaternion.w},'
-            '${quaternion.x},'
-            '${quaternion.y},'
-            '${quaternion.z},'
-            '${cameraPosition.x},'
-            '${cameraPosition.y},'
-            '${cameraPosition.z},'
-            '$cameraId,'
-            '$imageName\n');
+        dataBuffer.write('$imageId '
+            '${quaternion.w} '
+            '${quaternion.x} '
+            '${quaternion.y} '
+            '${quaternion.z} '
+            '${cameraPosition.x} '
+            '${cameraPosition.y} '
+            '${cameraPosition.z} '
+            '$cameraId '
+            '$imageName\n\n');
       }
 
       final directory = await getExternalStorageDirectory();
@@ -202,12 +209,12 @@ class _ARPageState extends State<ARPage> {
         await downloadDirectory.create(recursive: true);
       }
 
-      final filePath = '${downloadDirectory.path}/all_captured_photos_data_${DateTime.now().millisecondsSinceEpoch}.txt';
+      final filePath = '${downloadDirectory.path}/images_${DateTime.now().millisecondsSinceEpoch}.txt';
       final file = File(filePath);
 
       await file.writeAsString(dataBuffer.toString());
 
-      await file.writeAsString(dataBuffer.toString());
+      getCameraInfo();
 
       debugPrint('All camera data saved to ${file.path}');
     } catch (e) {
