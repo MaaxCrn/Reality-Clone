@@ -57,7 +57,7 @@ GeneratedModelEntity.init(
     },
     {
         sequelize,
-        tableName: "GeneratedModels",
+        tableName: "generated_model",
     }
 );
 

@@ -19,6 +19,10 @@ app.use(
   })
 );
 
+//sequelize.sync({ force: true }).then(() => {
+//  User.create({ mail: "admin", password: "admin", id: 1 });
+//});
+
 RegisterRoutes(app);
 
 app.listen(port, () => {

@@ -38,7 +38,7 @@ WaitingModel.init(
     },
     {
         sequelize,
-        tableName: "generated_model_statuts",
+        tableName: "waiting_model",
     }
 );
 
