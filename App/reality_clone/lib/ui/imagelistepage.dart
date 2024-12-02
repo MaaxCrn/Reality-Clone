@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../domain/CapturedPhoto.dart';
+import '../domain/capturedphoto.dart';
 
 class PhotoGalleryPage extends StatefulWidget {
   final List<CapturedPhoto> capturedPhotos;

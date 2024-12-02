@@ -11,7 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
 
-import '../domain/CapturedPhoto.dart';
+import '../domain/capturedphoto.dart';
 import 'imagelistepage.dart';
 
 class ARPage extends StatefulWidget {
