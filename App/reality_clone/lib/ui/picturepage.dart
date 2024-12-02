@@ -1,78 +1,121 @@
 import 'dart:io';
-import 'package:camera/camera.dart';
+import 'dart:ui';
+
+import 'package:ar_flutter_plugin_flutterflow/managers/ar_anchor_manager.dart';
+import 'package:ar_flutter_plugin_flutterflow/managers/ar_location_manager.dart';
+import 'package:ar_flutter_plugin_flutterflow/managers/ar_object_manager.dart';
+import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
+import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:path_provider/path_provider.dart';
 
-List<CameraDescription> cameras = [];
+import '../domain/CapturedPhoto.dart';
+import 'imagelistepage.dart';
 
-class PicturePage extends StatefulWidget {
-  final List<CameraDescription> cameras;
-  const PicturePage({Key? key, required this.cameras}) : super(key: key);
+class ARPage extends StatefulWidget {
+  const ARPage({super.key});
 
   @override
-  _CameraPageState createState() => _CameraPageState();
+  _ARPageState createState() => _ARPageState();
 }
 
-class _CameraPageState extends State<PicturePage> {
-  CameraController? _cameraController;
-  bool _isCameraInitialized = false;
-  final List<Map<String, dynamic>> capturedPhotosData = [];
+class _ARPageState extends State<ARPage> {
+  late ARSessionManager arSessionManager;
+  late ARObjectManager arObjectManager;
+
+  List<CapturedPhoto> capturedPhotos = [];
   int _photoCount = 0;
-
-  late ArCoreController arCoreController;
-
-  @override
-  void initState() {
-    super.initState();
-    _initCamera(widget.cameras.first);
-  }
-
-  Future<void> _initCamera(CameraDescription cameraDescription) async {
-    _cameraController = CameraController(cameraDescription, ResolutionPreset.high);
-    try {
-      await _cameraController!.initialize();
-      setState(() {
-        _isCameraInitialized = true;
-      });
-    } catch (e) {
-      debugPrint('Erreur d\'initialisation de la caméra : $e');
-    }
-  }
-
-  // Future<void> _initializeAR() async {
-  //   arCoreController = ArCoreController(
-  //     id: 1,
-  //   );
-  //
-  //   arCoreController.onPlaneDetected = (ArCorePlane plane) {
-  //     print("Plane detected at position: ${plane}");
-  //   };
-  //
-  //   await arCoreController.init();
-  // }
+  GlobalKey _repaintKey = GlobalKey();
 
   @override
   void dispose() {
-    _cameraController?.dispose();
-    arCoreController.dispose();
+    arSessionManager.dispose();
     super.dispose();
+  }
+
+  Future<void> _capturePhotosWithPositions() async {
+    int photosToCapture = 50 + (100 - 50) * (DateTime.now().millisecondsSinceEpoch % 50) ~/ 50;
+
+    for (int i = 0; i < 1; i++) {
+      final position = await _getCameraPosition();
+      await _takeScreenshot(position);
+
+      await Future.delayed(const Duration(seconds: 1));
+    }
+    debugPrint('Captured $photosToCapture photos.');
+  }
+
+  Future<Map<String, double>> _getCameraPosition() async {
+    final cameraPose = await arSessionManager.getCameraPose();
+    final cameraPosition = cameraPose!.getTranslation();
+
+    return {
+      'x': cameraPosition.x,
+      'y': cameraPosition.y,
+      'z': cameraPosition.z,
+    };
+  }
+
+  Future<void> _takeScreenshot(Map<String, double> position) async {
+    try {
+      RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      var image = await boundary.toImage(pixelRatio: 3.0);
+
+      image.toByteData(format: ImageByteFormat.png).then((byteData) async {
+        if (byteData != null) {
+          final directory = await getTemporaryDirectory();
+          final filePath = '${directory.path}/screenshot_${_photoCount + 1}.png';
+
+          final List<int> compressedBytes = await FlutterImageCompress.compressWithList(
+            byteData.buffer.asUint8List(),
+            minWidth: 800,
+            minHeight: 600,
+            quality: 80,
+          );
+
+          final file = File(filePath);
+          await file.writeAsBytes(compressedBytes);
+
+          capturedPhotos.add(CapturedPhoto(path: filePath, position: position));
+          _photoCount++;
+          debugPrint('Screenshot saved to $filePath');
+        }
+      });
+    } catch (e) {
+      debugPrint("Error capturing screenshot: $e");
+    }
+  }
+
+  void _showCapturedPhotos() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PhotoGalleryPage(capturedPhotos: capturedPhotos),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Camera and AR')),
-      body: _isCameraInitialized
-          ? Stack(
+      appBar: AppBar(title: const Text('AR Experience')),
+      body: Stack(
         children: [
-          CameraPreview(_cameraController!),
+          RepaintBoundary(
+            key: _repaintKey,
+            child: ARView(
+              onARViewCreated: onARViewCreated,
+            ),
+          ),
           Positioned(
             bottom: 20,
             left: 0,
             right: 0,
             child: Center(
               child: ElevatedButton(
-                onPressed: _capturePhoto,
+                onPressed: _capturePhotosWithPositions,
                 style: ElevatedButton.styleFrom(
                   shape: const CircleBorder(),
                   padding: const EdgeInsets.all(20),
@@ -81,41 +124,40 @@ class _CameraPageState extends State<PicturePage> {
               ),
             ),
           ),
+          Positioned(
+            bottom: 100,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ElevatedButton(
+                onPressed: _showCapturedPhotos,
+                style: ElevatedButton.styleFrom(
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(20),
+                ),
+                child: const Icon(Icons.photo_library, size: 30),
+              ),
+            ),
+          ),
         ],
-      )
-          : const Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 
-  Future<void> _capturePhoto() async {
-    if (_photoCount < 10) {
-      try {
-        final XFile photo = await _cameraController!.takePicture();
+  void onARViewCreated(
+      ARSessionManager arSessionManager,
+      ARObjectManager arObjectManager,
+      ARAnchorManager arAnchorManager,
+      ARLocationManager arLocationManager,
+      ) {
+    this.arSessionManager = arSessionManager;
 
-        final position = await _getCameraPosition();
+    this.arSessionManager.onInitialize(
+      showFeaturePoints: false,
+      showPlanes: false,
+      showWorldOrigin: false,
+      handleTaps: false,
+    );
 
-        print("Coordonnées de la caméra : x: ${position['x']}, y: ${position['y']}, z: ${position['z']}");
-
-        capturedPhotosData.add({
-          'photoPath': photo.path,
-          'position': position,
-        });
-
-        debugPrint('Photo capturée : ${photo.path}');
-        _photoCount++;
-
-      } catch (e) {
-        debugPrint('Erreur lors de la capture de la photo : $e');
-      }
-    }
-  }
-
-
-  Future<Map<String, double>> _getCameraPosition() async {
-    return {
-      'x': 1.0,
-      'y': 1.0,
-      'z': 1.0,
-    };
   }
 }
