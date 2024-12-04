@@ -34,10 +34,12 @@ export class ImageService {
             imageDirectory: path,
             userId: 1
         });
+
         const generationId = "output" + waitingModel.id.toString();
         const port = await portfinder.getPortPromise(constants.PORT_CONFIG);
 
         const query = ["activate", "gaussian_splatting", "&&",
+            ...this.loadColmapPoints(path), "&&",
             "python", "D:\\Mathis\\sae\\gaussian-splatting\\train.py -s", path,
             "--output_directory", generationId,
             "--port", port.toString()];
@@ -63,6 +65,19 @@ export class ImageService {
                 this.onGenerationFail(generationId);
             }
         });
+    }
+
+    private loadColmapPoints(extractedFilePath: string): string[] {
+        const imagePath = `${extractedFilePath}\\images`;
+        const dbPath = `${extractedFilePath}\\database.db`;
+        fs.mkdirSync(`${extractedFilePath}\\sparse\\0`);
+
+        const colmap = "D:\\Mathis\\sae\\realityclonegithub\\libs\\colmap\\bin\\colmap";
+        const commande1 = `${colmap} feature_extractor --database_path "${dbPath}" --image_path "${imagePath}" --ImageReader.camera_model PINHOLE --ImageReader.single_camera 1`;
+        const commande2 = `${colmap} exhaustive_matcher --database_path "${dbPath}"`;
+        const commande3 = `${colmap} point_triangulator --database_path "${dbPath}" --image_path "${imagePath}" --input_path "${extractedFilePath}\\sparse" --output_path "${extractedFilePath}"\\sparse\\0`;
+
+        return [commande1, "&&", commande2, "&&", commande3];
     }
 
     private async onGenerationSuccess(directory: string, generationId: string) {
