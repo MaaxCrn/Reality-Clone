@@ -3,11 +3,16 @@ import fs from 'fs';
 
 import AdmZip from "adm-zip";
 import path from "path";
+import portfinder from "portfinder";
+import constants from "../config/constants";
+import { badRequest } from "../error/BadRequestError";
 import { GeneratedModelEntity } from "../models/GeneratedModel";
 import { WaitingModel } from "../models/WaitingModel";
 
 export class ImageService {
     public async computeGaussianForFile(file: Express.Multer.File) {
+        await this.checkValidity();
+
         const extractedPath = path.join(__dirname, "../../extracted", path.basename(file.filename, ".zip"));
         try {
             // Décompresser le fichier ZIP
@@ -30,9 +35,12 @@ export class ImageService {
             userId: 1
         });
         const generationId = "output" + waitingModel.id.toString();
+        const port = await portfinder.getPortPromise(constants.PORT_CONFIG);
+
         const query = ["activate", "gaussian_splatting", "&&",
             "python", "D:\\Mathis\\sae\\gaussian-splatting\\train.py -s", path,
-            "--output_directory", generationId];
+            "--output_directory", generationId,
+            "--port", port.toString()];
 
         const process = spawn("conda", query, { shell: true });
 
@@ -46,14 +54,14 @@ export class ImageService {
         });
 
         process.on("close", (code) => {
+            waitingModel.destroy();
+            fs.rm(path, { recursive: true, force: true }, () => { });
+
             if (code === 0) {
                 this.onGenerationSuccess(path, generationId);
             } else {
-                console.error("Le processus a rencontré une erreur.");
+                this.onGenerationFail(generationId);
             }
-
-            fs.rm(path, { recursive: true, force: true }, () => { });
-            waitingModel.destroy();
         });
     }
 
@@ -73,6 +81,21 @@ export class ImageService {
         });
     }
 
+    private async onGenerationFail(generationId: string) {
+        const outputDirectory = "./output/" + generationId;
+        console.log("La génération a échoué, suppression du dossier de sortie.");
+
+        fs.rm(outputDirectory, { recursive: true, force: true }, () => { });
+    }
+
+    private async checkValidity() {
+        const amount = await WaitingModel.count();
+        console.log(amount);
+
+        if (amount >= constants.MAX_CONCURRENT_GENERATIONS) {
+            badRequest("Il y a déjà des générations en cours")
+        }
+    }
 }
 
 export const imageService = new ImageService();

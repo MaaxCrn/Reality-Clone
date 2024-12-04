@@ -33,12 +33,14 @@
     "joi": "^17.13.3",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "portfinder": "^1.0.32",
     "prettier": "^3.3.3",
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.3",
     "sqlite3": "^5.1.7",
     "swagger-ui-express": "^5.0.1",
-    "tsoa": "^6.4.0"
+    "tsoa": "^6.4.0",
+    "typescript": "^5.7.2"
   },
   "devDependencies": {
     "@types/adm-zip": "^0.5.7",

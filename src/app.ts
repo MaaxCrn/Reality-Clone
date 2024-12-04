@@ -3,6 +3,9 @@ import express, { Application } from 'express';
 import { RegisterRoutes } from './routes';
 
 import swaggerUi from "swagger-ui-express";
+import sequelize from './config/database';
+import errorHandler from './middlewares/errorHandler';
+import { User } from './models/User';
 
 const app: Application = express();
 const port = 3000;
@@ -19,12 +22,13 @@ app.use(
   })
 );
 
-//sequelize.sync({ force: true }).then(() => {
-//  User.create({ mail: "admin", password: "admin", id: 1 });
-//});
+sequelize.sync({ force: true }).then(() => {
+  User.create({ mail: "admin", password: "admin", id: 1 });
+});
 
 RegisterRoutes(app);
 
+app.use(errorHandler);
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
