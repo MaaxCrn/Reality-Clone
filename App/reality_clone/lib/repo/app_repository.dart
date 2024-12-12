@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:reality_clone/data_source/api_provider.dart';
 import '../model/project.dart';
 

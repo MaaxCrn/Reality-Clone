@@ -22,7 +22,7 @@ class _Api implements Api {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<void> computeGaussian(File zipFile) async {
+  Future<HttpResponse<dynamic>> computeGaussian(File zipFile) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -34,10 +34,11 @@ class _Api implements Api {
         filename: zipFile.path.split(Platform.pathSeparator).last,
       ),
     ));
-    final _options = _setStreamType<void>(Options(
+    final _options = _setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',
       headers: _headers,
       extra: _extra,
+      contentType: 'multipart/form-data',
     )
         .compose(
           _dio.options,
@@ -50,7 +51,10 @@ class _Api implements Api {
           _dio.options.baseUrl,
           baseUrl,
         )));
-    await _dio.fetch<void>(_options);
+    final _result = await _dio.fetch(_options);
+    final _value = _result.data;
+    final httpResponse = HttpResponse(_value, _result);
+    return httpResponse;
   }
 
   RequestOptions _setStreamType<T>(RequestOptions requestOptions) {

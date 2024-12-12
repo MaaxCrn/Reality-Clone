@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:reality_clone/repo/app_repository.dart';
+import 'package:reality_clone/services/zip_service.dart';
 import '../domain/capturedphoto.dart';
 
 class PhotoGalleryPage extends StatefulWidget {
@@ -91,6 +93,11 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
 
       debugPrint('All images and metadata saved to ${rootDirectory.path}');
       _showSaveSuccessDialog();
+
+      File zipFile = await FileService().zipFolderContents(rootDirectory.path, "gaussian.zip");
+      print("Zip file created at: ${zipFile.path}");
+      await appRepository.computeGaussian(zipFile);
+
     } catch (e) {
       debugPrint("Error saving images and metadata: $e");
     }

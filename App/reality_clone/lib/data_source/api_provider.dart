@@ -1,6 +1,5 @@
 import 'dart:core';
 import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
@@ -24,6 +23,9 @@ abstract class Api {
 
 
   @POST("image/compute-gaussian")
-  Future<void> computeGaussian(@Part(name: "file") File zipFile);
+  @MultiPart()
+  Future<HttpResponse> computeGaussian(
+      @Part(name: "file") File zipFile
+      );
 
 }
