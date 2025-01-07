@@ -4,10 +4,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:reality_clone/repo/app_repository.dart';
 import 'package:reality_clone/services/zip_service.dart';
-import '../domain/capturedphoto.dart';
+import '../../domain/capturedphoto.dart';
+import 'image_card.dart';
 
 class PhotoGalleryPage extends StatefulWidget {
-  final List<CapturedPhoto> capturedPhotos;
+  final List<CapturedImage> capturedPhotos;
 
   const PhotoGalleryPage({super.key, required this.capturedPhotos});
 
@@ -19,6 +20,9 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
   static const int minImagesToSave = 3;
 
   Future<void> _saveAllCapturedPhotos() async {
+    /*
+
+
     if (widget.capturedPhotos.length < minImagesToSave) {
       _showInsufficientImagesDialog();
       return;
@@ -45,6 +49,7 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
 
       StringBuffer cameraDataBuffer = StringBuffer();
       int x = 0;
+
 
       for (var photo in widget.capturedPhotos) {
         final file = File(photo.path);
@@ -101,6 +106,7 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
     } catch (e) {
       debugPrint("Error saving images and metadata: $e");
     }
+    */
   }
 
   void _showInsufficientImagesDialog() {
@@ -173,53 +179,9 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
         ),
         itemBuilder: (context, index) {
           final capturedPhoto = widget.capturedPhotos[index];
-          return Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            elevation: 4,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Image.file(
-                      File(capturedPhoto.path),
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.white),
-                      onPressed: () {
-                        _deletePhoto(context, index);
-                      },
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 8,
-                    left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 4, vertical: 2),
-                      color: Colors.black54,
-                      child: Text(
-                        'X: ${capturedPhoto.position['x']?.toStringAsFixed(2)}, Y: ${capturedPhoto.position['y']?.toStringAsFixed(2)}, Z: ${capturedPhoto.position['z']?.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          return ImageCard(
+            image: capturedPhoto,
+            onDelete: () => _deletePhoto(context, index),
           );
         },
       ),
