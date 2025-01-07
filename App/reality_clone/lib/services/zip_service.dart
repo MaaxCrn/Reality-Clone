@@ -17,6 +17,8 @@ class FileService {
 
 
   // Future<File> getEmptyZipFile() async {
+  //   return Archive();
+  // }
   //   Directory? appPath = await _localPath;
   //   if(appPath == null) {
   //     throw Exception("Error: Unable to access external storage");

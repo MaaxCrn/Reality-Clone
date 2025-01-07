@@ -19,6 +19,9 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
   static const int minImagesToSave = 3;
 
   Future<void> _saveAllCapturedPhotos() async {
+    /*
+
+
     if (widget.capturedPhotos.length < minImagesToSave) {
       _showInsufficientImagesDialog();
       return;
@@ -45,6 +48,7 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
 
       StringBuffer cameraDataBuffer = StringBuffer();
       int x = 0;
+
 
       for (var photo in widget.capturedPhotos) {
         final file = File(photo.path);
@@ -101,6 +105,7 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
     } catch (e) {
       debugPrint("Error saving images and metadata: $e");
     }
+    */
   }
 
   void _showInsufficientImagesDialog() {
@@ -183,8 +188,8 @@ class _PhotoGalleryPageState extends State<PhotoGalleryPage> {
               child: Stack(
                 children: [
                   Center(
-                    child: Image.file(
-                      File(capturedPhoto.path),
+                    child: Image.memory(
+                      capturedPhoto.getBytesAsList(),
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: double.infinity,

@@ -87,24 +87,25 @@ class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
 
       ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
       if (byteData != null) {
-        final directory = await getTemporaryDirectory();
-        final filePath = '${directory.path}/image_${_photoCount + 1}.png';
+        // final directory = await getTemporaryDirectory();
+        // final filePath = '${directory.path}/image_${_photoCount + 1}.png';
         final imageName = 'image_${_photoCount + 1}.png';
-
-        final file = File(filePath);
-        await file.writeAsBytes(byteData.buffer.asUint8List());
+        //
+        // final file = File(filePath);
+        // await file.writeAsBytes(byteData.buffer.asUint8List());
 
         capturedPhotos.add(
           CapturedPhoto(
             id: _photoCount + 1,
-            path: filePath,
+            // path: filePath,
+            bytedata: byteData,
             name: imageName,
             position: position,
             rotation: {},
           ),
         );
         _photoCount++;
-        debugPrint('Screenshot saved to $filePath');
+        debugPrint('Screenshot saved');
       }
     } catch (e) {
       debugPrint("Error capturing screenshot: $e");
