@@ -1,15 +1,17 @@
 
 import 'dart:typed_data';
 
-class CapturedPhoto {
+import 'package:reality_clone/model/position.dart';
+
+class CapturedImage {
   final int id;
   // final String path;
   final String name;
   final ByteData bytedata;
-  final Map<String, double> position;
+  final Position position;
   final Map<String, double> rotation;
 
-  CapturedPhoto({
+  CapturedImage({
     required this.id,
     required this.bytedata,
     // required this.path,
@@ -22,4 +24,5 @@ class CapturedPhoto {
   Uint8List getBytesAsList() {
     return bytedata.buffer.asUint8List();
   }
+
 }

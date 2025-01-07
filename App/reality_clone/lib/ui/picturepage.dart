@@ -10,9 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:reality_clone/model/position.dart';
 
 import '../domain/capturedphoto.dart';
-import 'imagelistepage.dart';
+import 'images_list/imagelistepage.dart';
 
 class ARPage extends StatefulWidget {
   const ARPage({super.key});
@@ -25,7 +26,7 @@ class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
   late ARSessionManager arSessionManager;
   late ARObjectManager arObjectManager;
 
-  List<CapturedPhoto> capturedPhotos = [];
+  List<CapturedImage> capturedPhotos = [];
   int _photoCount = 0;
   GlobalKey _repaintKey = GlobalKey();
   bool _isTakingPhoto = false;
@@ -68,18 +69,14 @@ class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
     });
   }
 
-  Future<Map<String, double>> _getCameraPosition() async {
+  Future<Position> _getCameraPosition() async {
     final cameraPose = await arSessionManager.getCameraPose();
     final cameraPosition = cameraPose!.getTranslation();
 
-    return {
-      'x': cameraPosition.x,
-      'y': cameraPosition.y,
-      'z': cameraPosition.z,
-    };
+    return Position(x: cameraPosition.x, y: cameraPosition.y, z: cameraPosition.z);
   }
 
-  Future<void> _takeScreenshot(Map<String, double> position) async {
+  Future<void> _takeScreenshot(Position position) async {
     try {
       RenderRepaintBoundary boundary = _repaintKey.currentContext!
           .findRenderObject() as RenderRepaintBoundary;
@@ -95,7 +92,7 @@ class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
         // await file.writeAsBytes(byteData.buffer.asUint8List());
 
         capturedPhotos.add(
-          CapturedPhoto(
+          CapturedImage(
             id: _photoCount + 1,
             // path: filePath,
             bytedata: byteData,

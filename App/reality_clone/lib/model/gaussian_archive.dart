@@ -12,7 +12,7 @@ class GaussianArchive {
   }
 
 
-  void addPicture(CapturedPhoto capturedPhoto) {
+  void addPicture(CapturedImage capturedPhoto) {
     //todo
     // ArchiveFile file = ArchiveFile();
     // _archive.addFile(file);
