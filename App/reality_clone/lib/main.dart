@@ -12,15 +12,13 @@ void main() {
   runApp(
     ChangeNotifierProvider(
       create: (_) => PictureNotifier(),
-      child: const MyApp(),
+      child: const RealityCloneApp(),
     ),
   );
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class RealityCloneApp extends StatelessWidget {
+  const RealityCloneApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -3,7 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import '../model/capturedphoto.dart';
+import '../model/captured_image.dart';
 import '../model/position.dart';
 
 class PictureNotifier extends ChangeNotifier {
