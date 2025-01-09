@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:archive/archive.dart';
-import 'package:reality_clone/domain/capturedphoto.dart';
+import 'package:reality_clone/model/capturedphoto.dart';
 
 class GaussianArchive {
   late Archive _archive;

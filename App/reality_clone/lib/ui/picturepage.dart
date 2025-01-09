@@ -1,18 +1,12 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui';
-
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_anchor_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_location_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_object_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
+import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
-import 'package:ar_flutter_plugin_flutterflow/ar_flutter_plugin.dart';
-import 'package:flutter/rendering.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:reality_clone/model/position.dart';
-
-import '../domain/capturedphoto.dart';
+import 'package:provider/provider.dart';
+import '../domain/picture_notifier.dart';
+import '../model/position.dart';
 import 'images_list/imagelistepage.dart';
 
 class ARPage extends StatefulWidget {
@@ -24,13 +18,8 @@ class ARPage extends StatefulWidget {
 
 class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
   late ARSessionManager arSessionManager;
-  late ARObjectManager arObjectManager;
 
-  List<CapturedImage> capturedPhotos = [];
-  int _photoCount = 0;
-  GlobalKey _repaintKey = GlobalKey();
-  bool _isTakingPhoto = false;
-
+  final GlobalKey _repaintKey = GlobalKey();
   late AnimationController _animationController;
   late Animation<double> _opacityAnimation;
 
@@ -42,7 +31,8 @@ class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
+    _opacityAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_animationController);
   }
 
   @override
@@ -52,74 +42,40 @@ class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _capturePhotosWithPositions() async {
-    setState(() {
-      _isTakingPhoto = true;
-    });
-
-    await _animationController.forward();
-    await Future.delayed(const Duration(milliseconds: 100));
-    await _animationController.reverse();
-
-    final position = await _getCameraPosition();
-    await _takeScreenshot(position);
-
-    setState(() {
-      _isTakingPhoto = false;
-    });
-  }
-
   Future<Position> _getCameraPosition() async {
     final cameraPose = await arSessionManager.getCameraPose();
     final cameraPosition = cameraPose!.getTranslation();
 
-    return Position(x: cameraPosition.x, y: cameraPosition.y, z: cameraPosition.z);
+    return Position(
+      x: cameraPosition.x,
+      y: cameraPosition.y,
+      z: cameraPosition.z,
+    );
   }
 
-  Future<void> _takeScreenshot(Position position) async {
-    try {
-      RenderRepaintBoundary boundary = _repaintKey.currentContext!
-          .findRenderObject() as RenderRepaintBoundary;
-      var image = await boundary.toImage(pixelRatio: 3.0);
+  void _capturePhoto(PictureNotifier pictureNotifier) async {
+    await _animationController.forward();
+    await Future.delayed(const Duration(milliseconds: 100));
+    await _animationController.reverse();
 
-      ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
-      if (byteData != null) {
-        // final directory = await getTemporaryDirectory();
-        // final filePath = '${directory.path}/image_${_photoCount + 1}.png';
-        final imageName = 'image_${_photoCount + 1}.png';
-        //
-        // final file = File(filePath);
-        // await file.writeAsBytes(byteData.buffer.asUint8List());
-
-        capturedPhotos.add(
-          CapturedImage(
-            id: _photoCount + 1,
-            // path: filePath,
-            bytedata: byteData,
-            name: imageName,
-            position: position,
-            rotation: {},
-          ),
-        );
-        _photoCount++;
-        debugPrint('Screenshot saved');
-      }
-    } catch (e) {
-      debugPrint("Error capturing screenshot: $e");
-    }
+    await pictureNotifier.capturePhoto(_repaintKey, _getCameraPosition);
   }
 
   void _showCapturedPhotos() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PhotoGalleryPage(capturedPhotos: capturedPhotos),
+        builder: (context) => PhotoGalleryPage(
+          capturedPhotos: context.read<PictureNotifier>().capturedPhotos,
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final pictureNotifier = context.read<PictureNotifier>();
+
     return Scaffold(
       appBar: AppBar(title: const Text('AR Experience')),
       body: Stack(
@@ -148,7 +104,7 @@ class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: _capturePhotosWithPositions,
+                  onPressed: () => _capturePhoto(pictureNotifier),
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(20),

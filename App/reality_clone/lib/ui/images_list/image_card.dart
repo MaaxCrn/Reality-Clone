@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reality_clone/domain/capturedphoto.dart';
+import 'package:reality_clone/model/capturedphoto.dart';
 
 class ImageCard extends StatelessWidget {
   final CapturedImage image;
