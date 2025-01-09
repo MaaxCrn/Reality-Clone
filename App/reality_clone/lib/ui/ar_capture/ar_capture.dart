@@ -5,6 +5,7 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reality_clone/model/ar_manager.dart';
 
 import '../../domain/ar_capture_notifier.dart';
 
@@ -20,24 +21,9 @@ class ArCapture extends StatefulWidget {
 
 class _ArCapture extends State<ArCapture> {
 
-  late ARSessionManager arSessionManager;
+  final ArManager arManager = ArManager();
 
 
-  void onARViewCreated(
-      ARSessionManager arSessionManager,
-      ARObjectManager arObjectManager,
-      ARAnchorManager arAnchorManager,
-      ARLocationManager arLocationManager,
-      ) {
-    this.arSessionManager = arSessionManager;
-
-    this.arSessionManager.onInitialize(
-      showFeaturePoints: false,
-      showPlanes: false,
-      showWorldOrigin: true,
-      handleTaps: false,
-    );
-  }
 
 
   @override
@@ -51,7 +37,7 @@ class _ArCapture extends State<ArCapture> {
         children: [
           RepaintBoundary(
             child: ARView(
-              onARViewCreated: onARViewCreated,
+              onARViewCreated: arManager.onARViewCreated,
             ),
           ),
           Positioned(
@@ -62,7 +48,7 @@ class _ArCapture extends State<ArCapture> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
-                  onPressed: () => _capturePhoto(pictureNotifier),
+                  onPressed: () => {},
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(20),
@@ -70,7 +56,7 @@ class _ArCapture extends State<ArCapture> {
                   child: const Icon(Icons.camera_alt, size: 30),
                 ),
                 ElevatedButton(
-                  onPressed: _showCapturedPhotos,
+                  onPressed: ()=>{},
                   style: ElevatedButton.styleFrom(
                     shape: const CircleBorder(),
                     padding: const EdgeInsets.all(20),

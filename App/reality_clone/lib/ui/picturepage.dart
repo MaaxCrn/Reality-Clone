@@ -5,6 +5,7 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reality_clone/model/ar_manager.dart';
 import '../domain/picture_notifier.dart';
 import '../model/position.dart';
 import 'images_list/imagelistepage.dart';
@@ -18,6 +19,7 @@ class ARPage extends StatefulWidget {
 
 class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
   late ARSessionManager arSessionManager;
+  final ArManager _arManager = ArManager();
 
   final GlobalKey _repaintKey = GlobalKey();
   late AnimationController _animationController;
@@ -38,6 +40,7 @@ class _ARPageState extends State<ARPage> with SingleTickerProviderStateMixin {
   @override
   void dispose() {
     _animationController.dispose();
+    _arManager.dispose();
     arSessionManager.dispose();
     super.dispose();
   }
