@@ -1,26 +1,45 @@
 import 'package:flutter/material.dart';
-import 'package:reality_clone/model/gaussian_archive.dart';
 import 'package:reality_clone/repo/app_repository.dart';
 
+import '../model/capture_list.dart';
 import '../model/captured_image.dart';
 
 class ArCaptureNotifier extends ChangeNotifier {
-  GaussianArchive _gaussianArchive = GaussianArchive();
+  static const MIN_IMAGE_COUNT = 3;
+  final CaptureList _captureList = CaptureList();
 
 
-  void _addPictureToArchive(CapturedImage capturedImage) {
-    _gaussianArchive.addPicture(capturedImage);
+
+
+  int get pictureCount => _captureList.length;
+
+  List<CapturedImage> get capturedImages => _captureList.capturedImages;
+
+  bool isEmpty() => _captureList.length == 0;
+
+
+  void addCapturedImage(CapturedImage capturedImage) {
+    _captureList.addPicture(capturedImage);
     notifyListeners();
   }
+
 
   Future<void> _sendArchive() async {
-    final archive = await _gaussianArchive.asFile();
+    final archive = await _captureList.getZipFile();
     AppRepository().computeGaussian(archive);
-    _gaussianArchive.asFile();
     notifyListeners();
   }
 
 
+  bool canSave() {
+    return _captureList.length >= MIN_IMAGE_COUNT;
+  }
+
+  void saveAndSendImages() {
+    if (canSave()) {
+      _sendArchive();
+    }
+  }
 
 
 

@@ -17,6 +17,7 @@ class CaptureList {
 
   List<CapturedImage> get capturedImages => _capturedImages;
 
+  int get length => _capturedImages.length;
 
   Future<File> getZipFile() async {
     return await _archive.asFile();

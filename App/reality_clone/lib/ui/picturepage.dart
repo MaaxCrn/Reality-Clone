@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:reality_clone/model/ar_manager.dart';
 import '../domain/picture_notifier.dart';
 import '../model/position.dart';
-import 'images_list/imagelistepage.dart';
+import 'ar_capture/images_list/imagelistepage.dart';
 
 class ARPage extends StatefulWidget {
   const ARPage({super.key});

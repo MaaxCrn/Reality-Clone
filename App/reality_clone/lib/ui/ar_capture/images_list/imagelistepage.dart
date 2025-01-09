@@ -1,10 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:image/image.dart' as img;
-import 'package:reality_clone/repo/app_repository.dart';
-import 'package:reality_clone/services/file_service.dart';
-import '../../model/captured_image.dart';
+import '../../../model/captured_image.dart';
 import 'image_card.dart';
 
 class PhotoGalleryPage extends StatefulWidget {
