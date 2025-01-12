@@ -17,18 +17,20 @@ class _ArCapturePictureListState extends State<ArCapturePictureList> {
 
   Future<void> onSaveImagesButtonPressed() async {
     if(_isSaving.value) return;
+    _isSaving.value = true;
+
     final arCaptureNotifier = context.read<ArCaptureNotifier>();
     if (arCaptureNotifier.hasEnoughImages()) {
-      _isSaving.value = true;
       try {
         await arCaptureNotifier.saveAndSendImages();
       } catch (e) {
         print('Error saving images: $e');
       }
-      _isSaving.value = false;
     } else {
       _showMinimumImagesCountNotSatisfiedDialog();
     }
+    _isSaving.value = false;
+
   }
 
   void _showMinimumImagesCountNotSatisfiedDialog() {
@@ -87,7 +89,7 @@ class _ArCapturePictureListState extends State<ArCapturePictureList> {
                   final capturedPhoto = arCaptureNotifier.capturedImages[index];
                   return ImageCard(
                     image: capturedPhoto,
-                    onDelete: () => {},
+                    onDelete: () => arCaptureNotifier.removeAtIndex(index),
                   );
                 },
               ),
