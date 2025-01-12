@@ -13,6 +13,7 @@ import 'position.dart';
 
 class ArManager {
   late ARSessionManager _arSessionManager;
+  int currentId = 0;
 
   ArManager();
 
@@ -73,7 +74,8 @@ class ArManager {
   }*/
 
 
-  Future<CapturedImage?> takeScreenshot(GlobalKey repaintKey, int id) async {
+  Future<CapturedImage?> takeScreenshot(GlobalKey repaintKey) async {
+      final int currentIdCopy = currentId++;
       RenderRepaintBoundary boundary = repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
 
       var image = await boundary.toImage();
@@ -82,10 +84,10 @@ class ArManager {
       if (byteData != null) {
         final position = await getCameraPosition();
 
-        final imageName = 'image_${id}.png';
+        final imageName = 'image_$currentIdCopy.png';
 
         CapturedImage capturedImage = CapturedImage(
-          id: id,
+          id: currentIdCopy,
           bytedata: byteData,
           name: imageName,
           position: position,

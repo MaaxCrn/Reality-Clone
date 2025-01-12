@@ -25,7 +25,7 @@ class _ArCaptureState extends State<ArCapture> {
 
   void onCaptureButtonPressed() async {
     final arCaptureNotifier = context.read<ArCaptureNotifier>();
-    final capturedImage = await arManager.takeScreenshot(_repaintKey, arCaptureNotifier.pictureCount);
+    final capturedImage = await arManager.takeScreenshot(_repaintKey);
     if(capturedImage != null){
       arCaptureNotifier.addCapturedImage(capturedImage);
     }else{
