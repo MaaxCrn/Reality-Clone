@@ -10,7 +10,6 @@ class ArCaptureNotifier extends ChangeNotifier {
 
 
 
-
   int get pictureCount => _captureList.length;
 
   List<CapturedImage> get capturedImages => _captureList.capturedImages;

@@ -74,13 +74,14 @@ class ArManager {
 
 
   Future<CapturedImage?> takeScreenshot(GlobalKey repaintKey, int id) async {
-    try {
       RenderRepaintBoundary boundary = repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      var image = await boundary.toImage(pixelRatio: 3.0);
 
+      var image = await boundary.toImage();
       ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+
       if (byteData != null) {
         final position = await getCameraPosition();
+
         final imageName = 'image_${id}.png';
 
         CapturedImage capturedImage = CapturedImage(
@@ -92,9 +93,6 @@ class ArManager {
         );
         return capturedImage;
       }
-    } catch (e) {
-      debugPrint("Error capturing image: $e");
-    }
     return null;
   }
 

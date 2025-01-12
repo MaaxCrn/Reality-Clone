@@ -1,5 +1,6 @@
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:reality_clone/model/ar_manager.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
@@ -16,17 +17,19 @@ class ArCapture extends StatefulWidget {
 
 
 
-class _ArCapture extends State<ArCapture> {
+class _ArCapture extends State<ArCapture> with SingleTickerProviderStateMixin {
 
   final ArManager arManager = ArManager();
+  final GlobalKey _repaintKey = GlobalKey();
 
 
   void onCaptureButtonPressed() async {
     final arCaptureNotifier = context.read<ArCaptureNotifier>();
-
-    final capturedImage = await arManager.takeScreenshot(GlobalKey(), arCaptureNotifier.pictureCount);
+    final capturedImage = await arManager.takeScreenshot(_repaintKey, arCaptureNotifier.pictureCount);
     if(capturedImage != null){
       arCaptureNotifier.addCapturedImage(capturedImage);
+    }else{
+     throw Exception("stop");
     }
   }
 
@@ -42,14 +45,14 @@ class _ArCapture extends State<ArCapture> {
 
   @override
   Widget build(BuildContext context) {
-    final arCaptureNotifier = context.watch<ArCaptureNotifier>();
-
+    final arCaptureNotifier = Provider.of<ArCaptureNotifier>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('AR capture')),
+      appBar: AppBar(title: Text('AR capture ${arCaptureNotifier.pictureCount}')),
       body: Stack(
         children: [
           RepaintBoundary(
+            key: _repaintKey,
             child: ARView(
               onARViewCreated: arManager.onARViewCreated,
             ),
