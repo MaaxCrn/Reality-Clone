@@ -10,10 +10,14 @@ class CaptureList {
   CaptureList();
 
   void addPicture(CapturedImage capturedImage) {
-    _capturedImages.add(capturedImage);
+    _capturedImages.insert(0, capturedImage);
     _archive.addPicture(capturedImage);
   }
 
+  removeAtIndex(int index) {
+    _capturedImages.removeAt(index);
+    //todo : remove from archive
+  }
 
   List<CapturedImage> get capturedImages => _capturedImages;
 

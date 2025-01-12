@@ -39,7 +39,7 @@ class ArCaptureNotifier extends ChangeNotifier {
   }
 
   void removeAtIndex(int index) {
-    _captureList.capturedImages.removeAt(index);
+    _captureList.removeAtIndex(index);
     notifyListeners();
   }
 
