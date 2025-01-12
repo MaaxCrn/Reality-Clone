@@ -8,30 +8,27 @@ class ArCapturePictureList extends StatefulWidget {
   const ArCapturePictureList({super.key});
 
   @override
-  State<ArCapturePictureList> createState() => _ArCapturePictureList();
+  State<ArCapturePictureList> createState() => _ArCapturePictureListState();
 }
 
 
 
 
-class _ArCapturePictureList extends State<ArCapturePictureList> {
+class _ArCapturePictureListState extends State<ArCapturePictureList> {
 
 
-  void onSaveImagesButtonPressed(){
+  void onSaveImagesButtonPressed() {
     final arCaptureNotifier = context.read<ArCaptureNotifier>();
-    if(arCaptureNotifier.canSave()){
+    if (arCaptureNotifier.canSave()) {
       arCaptureNotifier.saveAndSendImages();
-    }else{
+    } else {
       //todo : show error message;
     }
   }
 
 
-
-
   @override
   Widget build(BuildContext context) {
-    // final arCaptureNotifier = context.read<ArCaptureNotifier>();
     final arCaptureNotifier = Provider.of<ArCaptureNotifier>(context);
 
     return Scaffold(
@@ -43,7 +40,8 @@ class _ArCapturePictureList extends State<ArCapturePictureList> {
             child: Center(
               child: Text(
                 arCaptureNotifier.pictureCount.toString(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
           ),
@@ -68,11 +66,11 @@ class _ArCapturePictureList extends State<ArCapturePictureList> {
         },
       ),
 
-        floatingActionButton: FloatingActionButton(
-          onPressed: ()=>{},
-          tooltip: 'Save all photos',
-          child: const Icon(Icons.save),
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => {},
+        tooltip: 'Save all photos',
+        child: const Icon(Icons.save),
+      ),
     );
   }
 }

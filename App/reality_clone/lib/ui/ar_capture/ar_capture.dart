@@ -11,13 +11,13 @@ class ArCapture extends StatefulWidget {
   const ArCapture({super.key});
 
   @override
-  State<ArCapture> createState() => _ArCapture();
+  State<ArCapture> createState() => _ArCaptureState();
 }
 
 
 
 
-class _ArCapture extends State<ArCapture> with SingleTickerProviderStateMixin {
+class _ArCaptureState extends State<ArCapture> {
 
   final ArManager arManager = ArManager();
   final GlobalKey _repaintKey = GlobalKey();
@@ -86,5 +86,12 @@ class _ArCapture extends State<ArCapture> with SingleTickerProviderStateMixin {
         ],
       ),
     );
+  }
+
+
+  @override
+  void dispose() {
+    context.read<ArCaptureNotifier>().clear();
+    super.dispose();
   }
 }

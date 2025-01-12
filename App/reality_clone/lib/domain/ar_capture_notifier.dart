@@ -41,6 +41,12 @@ class ArCaptureNotifier extends ChangeNotifier {
   }
 
 
+  void clear() {
+    _captureList.clear();
+    notifyListeners();
+  }
+
+
 
   
 

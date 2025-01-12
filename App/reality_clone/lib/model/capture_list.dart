@@ -23,6 +23,9 @@ class CaptureList {
     return await _archive.asFile();
   }
 
+  void clear() {
+    _capturedImages.clear();
+  }
 
 
 }
