@@ -9,7 +9,6 @@ class ArCaptureNotifier extends ChangeNotifier {
   final CaptureList _captureList = CaptureList();
 
 
-
   int get pictureCount => _captureList.length;
 
   List<CapturedImage> get capturedImages => _captureList.capturedImages;
@@ -25,18 +24,17 @@ class ArCaptureNotifier extends ChangeNotifier {
 
   Future<void> _sendArchive() async {
     final archive = await _captureList.getZipFile();
-    AppRepository().computeGaussian(archive);
-    notifyListeners();
+    await AppRepository().computeGaussian(archive);
   }
 
 
-  bool canSave() {
+  bool hasEnoughImages() {
     return _captureList.length >= MIN_IMAGE_COUNT;
   }
 
-  void saveAndSendImages() {
-    if (canSave()) {
-      _sendArchive();
+  Future<void> saveAndSendImages() async {
+    if (hasEnoughImages()) {
+      await _sendArchive();
     }
   }
 

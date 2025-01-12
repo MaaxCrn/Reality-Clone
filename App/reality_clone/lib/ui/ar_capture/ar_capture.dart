@@ -1,6 +1,5 @@
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:reality_clone/model/ar_manager.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
@@ -48,20 +47,20 @@ class _ArCaptureState extends State<ArCapture> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirmer"),
-          content: Text("Voulez-vous vraiment quitter ? Vos modifications seront perdues."),
+          title: Text("Confirm"),
+          content: Text("Are you sure you want to quit? All captured images will be lost."),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
-              child: Text("Annuler"),
+              child: Text("Cancel"),
             ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
-              child: Text("Quitter"),
+              child: Text("Quit"),
             ),
           ],
         );
@@ -81,7 +80,7 @@ class _ArCaptureState extends State<ArCapture> {
         shouldExit = await _showExitConfirmationDialog();
         if(shouldExit){
           Navigator.of(context).pop();
-          dispose();
+          arCaptureNotifier.clear();
         }
       },
       child: Scaffold(

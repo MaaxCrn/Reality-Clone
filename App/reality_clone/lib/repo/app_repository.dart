@@ -15,7 +15,7 @@ class AppRepository {
 
 
   Future<void> computeGaussian(File zipFile) async {
-      apiProvider.computeGaussian(zipFile);
+      await apiProvider.computeGaussian(zipFile);
   }
 
 }
