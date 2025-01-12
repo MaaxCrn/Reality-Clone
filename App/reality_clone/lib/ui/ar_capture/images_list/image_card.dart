@@ -32,6 +32,23 @@ class ImageCard extends StatelessWidget {
             ),
             Positioned(
               top: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 4, vertical: 2),
+                color: Colors.black54,
+                child: Text(
+                  "#${image.id}",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
               right: 8,
               child: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.white),
