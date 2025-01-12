@@ -21,6 +21,7 @@ class _ArCaptureState extends State<ArCapture> {
 
   final ArManager arManager = ArManager();
   final GlobalKey _repaintKey = GlobalKey();
+  bool shouldExit = false;
 
 
   void onCaptureButtonPressed() async {
@@ -38,7 +39,34 @@ class _ArCaptureState extends State<ArCapture> {
       context,
       MaterialPageRoute(builder: (context) => ArCapturePictureList()),
     );
-    // Navigator.pushNamed(context, '/capture/list');
+  }
+
+
+
+  Future<bool> _showExitConfirmationDialog() async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirmer"),
+          content: Text("Voulez-vous vraiment quitter ? Vos modifications seront perdues."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text("Annuler"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text("Quitter"),
+            ),
+          ],
+        );
+      },
+    ) ?? false;
   }
 
 
@@ -47,43 +75,53 @@ class _ArCaptureState extends State<ArCapture> {
   Widget build(BuildContext context) {
     final arCaptureNotifier = Provider.of<ArCaptureNotifier>(context);
 
-    return Scaffold(
-      appBar: AppBar(title: Text('AR capture ${arCaptureNotifier.pictureCount}')),
-      body: Stack(
-        children: [
-          RepaintBoundary(
-            key: _repaintKey,
-            child: ARView(
-              onARViewCreated: arManager.onARViewCreated,
+    return PopScope(
+      canPop: arCaptureNotifier.isEmpty(),
+      onPopInvokedWithResult: (result, dynamic) async {
+        shouldExit = await _showExitConfirmationDialog();
+        if(shouldExit){
+          Navigator.of(context).pop();
+          dispose();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(title: Text('AR capture ${arCaptureNotifier.pictureCount}')),
+        body: Stack(
+          children: [
+            RepaintBoundary(
+              key: _repaintKey,
+              child: ARView(
+                onARViewCreated: arManager.onARViewCreated,
+              ),
             ),
-          ),
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: onCaptureButtonPressed,
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(20),
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: onCaptureButtonPressed,
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(20),
+                    ),
+                    child: const Icon(Icons.camera_alt, size: 30),
                   ),
-                  child: const Icon(Icons.camera_alt, size: 30),
-                ),
-                ElevatedButton(
-                  onPressed: onImageListButtonPressed,
-                  style: ElevatedButton.styleFrom(
-                    shape: const CircleBorder(),
-                    padding: const EdgeInsets.all(20),
+                  ElevatedButton(
+                    onPressed: onImageListButtonPressed,
+                    style: ElevatedButton.styleFrom(
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(20),
+                    ),
+                    child: const Icon(Icons.photo_library, size: 30),
                   ),
-                  child: const Icon(Icons.photo_library, size: 30),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
