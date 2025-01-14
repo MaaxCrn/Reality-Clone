@@ -12,10 +12,9 @@ class GaussianArchive {
     _archive = Archive();
   }
 
-
    ArchiveFile addPicture(CapturedImage capturedImage) {
       Uint8List bytesList = capturedImage.getBytesAsList();
-      ArchiveFile file = ArchiveFile(capturedImage.name, bytesList.length, bytesList);
+      ArchiveFile file = ArchiveFile("images/${capturedImage.name}", bytesList.length, bytesList);
       _archive.addFile(file);
 
       return file;
@@ -24,7 +23,6 @@ class GaussianArchive {
   void removePicture(ArchiveFile fileToRemove) {
       _archive.removeFile(fileToRemove);
   }
-
 
   Future<File> asFile() async{
     final encoder = ZipEncoder();
@@ -39,4 +37,7 @@ class GaussianArchive {
     return file;
   }
 
+  void clear() {
+    _archive.clearSync();
+  }
 }

@@ -29,8 +29,7 @@ class CaptureList {
   }
 
   void clear() {
+    _archive.clear();
     _capturedImages.clear();
   }
-
-
 }
