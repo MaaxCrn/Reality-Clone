@@ -11,12 +11,13 @@ class CaptureList {
 
   void addPicture(CapturedImage capturedImage) {
     _capturedImages.insert(0, capturedImage);
-    _archive.addPicture(capturedImage);
+    final file = _archive.addPicture(capturedImage);
+    capturedImage.archiveFile = file;
   }
 
   removeAtIndex(int index) {
-    _capturedImages.removeAt(index);
-    //todo : remove from archive
+    final image = _capturedImages.removeAt(index);
+    _archive.removePicture(image.archiveFile!);
   }
 
   List<CapturedImage> get capturedImages => _capturedImages;

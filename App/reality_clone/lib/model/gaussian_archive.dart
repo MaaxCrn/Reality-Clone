@@ -13,14 +13,17 @@ class GaussianArchive {
   }
 
 
-  void addPicture(CapturedImage capturedImage) {
-    {
+   ArchiveFile addPicture(CapturedImage capturedImage) {
       Uint8List bytesList = capturedImage.getBytesAsList();
       ArchiveFile file = ArchiveFile(capturedImage.name, bytesList.length, bytesList);
       _archive.addFile(file);
-    }
+
+      return file;
   }
 
+  void removePicture(ArchiveFile fileToRemove) {
+      _archive.removeFile(fileToRemove);
+  }
 
 
   Future<File> asFile() async{

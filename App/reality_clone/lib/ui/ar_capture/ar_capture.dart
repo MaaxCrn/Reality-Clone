@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reality_clone/model/ar_manager.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
+import 'package:reality_clone/ui/ar_capture/list_notification_button.dart';
 
 import '../../domain/ar_capture_notifier.dart';
 
@@ -108,14 +109,10 @@ class _ArCaptureState extends State<ArCapture> {
                     ),
                     child: const Icon(Icons.camera_alt, size: 30),
                   ),
-                  ElevatedButton(
-                    onPressed: onImageListButtonPressed,
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
-                    ),
-                    child: const Icon(Icons.photo_library, size: 30),
-                  ),
+                  ListNotificationButton(
+                      initialNotificationCount: arCaptureNotifier.pictureCount,
+                      onPressed: onImageListButtonPressed),
+
                 ],
               ),
             ),

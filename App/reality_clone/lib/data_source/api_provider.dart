@@ -12,7 +12,7 @@ abstract class Api {
   factory Api() {
     final dio = Dio(
       BaseOptions(
-        baseUrl: "http://192.168.27.116:3000/",
+        baseUrl: "http://192.168.224.116:3000/",
         contentType: "application/json"
       ),
     );

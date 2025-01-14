@@ -1,6 +1,7 @@
 
 import 'dart:typed_data';
 
+import 'package:archive/archive.dart';
 import 'package:reality_clone/model/position.dart';
 
 class CapturedImage {
@@ -8,6 +9,7 @@ class CapturedImage {
   // final String path;
   final String name;
   final ByteData bytedata;
+  ArchiveFile? archiveFile;
   final Position position;
   final Map<String, double> rotation;
 
@@ -19,6 +21,7 @@ class CapturedImage {
     required this.position,
     required this.rotation,
   });
+
 
 
   Uint8List getBytesAsList() {
