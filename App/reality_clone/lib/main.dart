@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:reality_clone/domain/ar_capture_notifier.dart';
+import 'package:reality_clone/domain/homepage_notifier.dart';
+import 'package:reality_clone/repo/app_repository.dart';
 import 'package:reality_clone/theme/app_theme.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
@@ -24,6 +26,7 @@ class RealityCloneApp extends StatelessWidget {
     return MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (context) => ArCaptureNotifier()),
+          ChangeNotifierProvider(create: (context) => HomePageNotifier(AppRepository())),
         ],
         child: MaterialApp(
           title: 'Reality Clone',

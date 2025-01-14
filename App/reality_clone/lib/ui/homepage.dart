@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../domain/homepage_notifier.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -6,17 +8,18 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final List<Map<String, String>> items = [
-    {'title': 'Bike', 'date': '12 Nov 2024', 'image': 'assets/bike.png'},
-    {'title': 'Car', 'date': '8 Nov 2024', 'image': 'assets/car.png'},
-    {'title': 'Fountain', 'date': '12 Nov 2024', 'image': 'assets/fountain.png'},
-    {'title': 'Tree', 'date': '12 Nov 2024', 'image': 'assets/tree.png'},
-    {'title': 'Foundation', 'date': '12 Nov 2024', 'image': 'assets/foundation.png'},
-    {'title': 'Truck', 'date': '12 Nov 2024', 'image': 'assets/truck.png'},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    final homeNotifier = context.read<HomePageNotifier>();
+    homeNotifier.fetchGaussianList();
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    final homeNotifier = context.watch<HomePageNotifier>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gallery'),
@@ -29,7 +32,16 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: Padding(
+      body: homeNotifier.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : homeNotifier.models.isEmpty
+          ? const Center(
+        child: Text(
+          "Aucun modèle disponible.",
+          style: TextStyle(fontSize: 18, color: Colors.grey),
+        ),
+      )
+          : Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -38,8 +50,9 @@ class _HomePageState extends State<HomePage> {
             mainAxisSpacing: 8.0,
             childAspectRatio: 3 / 4,
           ),
-          itemCount: items.length,
+          itemCount: homeNotifier.models.length,
           itemBuilder: (context, index) {
+            final photo = homeNotifier.models[index];
             return Card(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -52,8 +65,8 @@ class _HomePageState extends State<HomePage> {
                   Expanded(
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        items[index]['image']!,
+                      child: Image.network(
+                        photo.pathImage,
                         fit: BoxFit.cover,
                         width: double.infinity,
                       ),
@@ -65,13 +78,13 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          items[index]['title']!,
+                          photo.name,
                           style: const TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          items[index]['date']!,
+                          photo.date,
                           style: const TextStyle(color: Colors.grey),
                         ),
                       ],

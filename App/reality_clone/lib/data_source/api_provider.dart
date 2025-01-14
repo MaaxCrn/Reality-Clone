@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../model/gaussian_model.dart';
+
 part 'api_provider.g.dart';
 
 final apiProvider = Api();
@@ -27,5 +29,9 @@ abstract class Api {
   Future<HttpResponse> computeGaussian(
       @Part(name: "file") File zipFile
       );
+
+  @GET("image")
+  Future<List<GaussianModel>> getGaussianList();
+
 
 }
