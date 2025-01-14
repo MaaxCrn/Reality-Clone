@@ -7,6 +7,8 @@ import 'package:ar_flutter_plugin_flutterflow/managers/ar_object_manager.dart';
 import 'package:ar_flutter_plugin_flutterflow/managers/ar_session_manager.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
+import 'package:reality_clone/model/quaternion.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'captured_image.dart';
 import 'position.dart';
@@ -60,18 +62,21 @@ class ArManager {
     );
   }
 
-  /*
-  Future<Position> getCameraPosition() async {
-    final cameraPose = await _arSessionManager.getCameraPose();
-    final cameraRotation = cameraPose!.getRotation();
 
-    return Position(
-      x: cameraRotation..x,
-      y: cameraRotation.y,
-      z: cameraRotation.z,
-      w: cameraRotation.w,
+  Future<Rotation> getCameraRotation({required invert}) async {
+    final cameraPose = await _arSessionManager.getCameraPose();
+    final cameraRotationMatrix = cameraPose!.getRotation();
+
+    final quaternion = Quaternion.fromRotation(cameraRotationMatrix);
+    if(invert) quaternion.inverse();
+
+    return Rotation(
+      w: quaternion.w,
+      x: quaternion.x,
+      y: quaternion.y,
+      z: quaternion.z,
     );
-  }*/
+  }
 
 
   Future<CapturedImage?> takeScreenshot(GlobalKey repaintKey) async {
@@ -83,6 +88,7 @@ class ArManager {
 
       if (byteData != null) {
         final position = await getCameraPosition();
+        final rotation = await getCameraRotation(invert: false);
 
         final imageName = 'image_$currentIdCopy.png';
 
@@ -90,8 +96,10 @@ class ArManager {
           id: currentIdCopy,
           bytedata: byteData,
           name: imageName,
+          imageWidth: image.width,
+          imageHeight: image.height,
           position: position,
-          rotation: {},
+          rotation: rotation,
         );
         return capturedImage;
       }

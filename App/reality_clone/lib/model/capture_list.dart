@@ -7,6 +7,8 @@ class CaptureList {
   final List<CapturedImage> _capturedImages = [];
   final GaussianArchive _archive = GaussianArchive();
 
+  get archive => _archive;
+
   CaptureList();
 
   void addPicture(CapturedImage capturedImage) {
@@ -26,6 +28,14 @@ class CaptureList {
 
   Future<File> getZipFile() async {
     return await _archive.asFile();
+  }
+
+  CapturedImage? first() {
+    try {
+      return _capturedImages.first;
+    } catch (e) {
+      return null;
+    }
   }
 
   void clear() {
