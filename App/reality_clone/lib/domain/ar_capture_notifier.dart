@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reality_clone/model/camera_info.dart';
 import 'package:reality_clone/repo/app_repository.dart';
 
 import '../model/capture_list.dart';
@@ -34,8 +35,22 @@ class ArCaptureNotifier extends ChangeNotifier {
 
   Future<void> saveAndSendImages() async {
     if (hasEnoughImages()) {
+      final cameraInfo = _getCameraInfo();
+      if (cameraInfo == null) throw Exception("Camera info is null");
+
+      _captureList.archive.addCameraInfo(cameraInfo);
+      _captureList.archive.addPoints3DFile();
+      _captureList.archive.addImagesFile(_captureList.capturedImages);
       await _sendArchive();
     }
+  }
+
+  CameraInfo? _getCameraInfo() {
+    final sampleImage = _captureList.first();
+    if (sampleImage != null) {
+      return CameraInfo(imageWidth: sampleImage.imageWidth, imageHeight: sampleImage.imageHeight, fx: 1739, fy: 1739);
+    }
+    return null;
   }
 
   void removeAtIndex(int index) {
@@ -47,9 +62,4 @@ class ArCaptureNotifier extends ChangeNotifier {
     _captureList.clear();
     notifyListeners();
   }
-
-
-
-  
-
 }

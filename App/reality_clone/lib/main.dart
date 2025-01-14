@@ -8,8 +8,6 @@ import 'package:reality_clone/ui/homepage.dart';
 import 'package:reality_clone/ui/loginpage.dart';
 import 'package:reality_clone/ui/settingpage.dart';
 
-import 'domain/picture_notifier.dart';
-
 void main() {
   runApp(const RealityCloneApp());
 }
