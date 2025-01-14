@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:reality_clone/domain/capturedphoto.dart';
+import 'package:reality_clone/model/captured_image.dart';
 
 class ImageCard extends StatelessWidget {
   final CapturedImage image;
@@ -28,6 +28,23 @@ class ImageCard extends StatelessWidget {
                 fit: BoxFit.cover,
                 width: double.infinity,
                 height: double.infinity,
+              ),
+            ),
+            Positioned(
+              top: 8,
+              left: 8,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 4, vertical: 2),
+                color: Colors.black54,
+                child: Text(
+                  "#${image.id}",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
             Positioned(

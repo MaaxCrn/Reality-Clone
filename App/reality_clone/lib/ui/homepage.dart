@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(context, '/picture');
+          Navigator.pushNamed(context, '/capture');
         },
         child: const Icon(Icons.add),
       ),
