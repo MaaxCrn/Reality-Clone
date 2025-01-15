@@ -1,44 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:reality_clone/domain/ar_capture_notifier.dart';
-import 'package:reality_clone/domain/homepage_notifier.dart';
-import 'package:reality_clone/repo/app_repository.dart';
-import 'package:reality_clone/theme/app_theme.dart';
-import 'package:reality_clone/ui/ar_capture/ar_capture.dart';
-import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
-import 'package:reality_clone/ui/homepage.dart';
-import 'package:reality_clone/ui/loginpage.dart';
-import 'package:reality_clone/ui/settingpage.dart';
-
-import 'domain/picture_notifier.dart';
+import 'package:my_custom_plugin/my_custom_plugin.dart';
 
 void main() {
-  runApp(const RealityCloneApp());
+  runApp(MyApp());
 }
 
-class RealityCloneApp extends StatelessWidget {
-  const RealityCloneApp({super.key});
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final materialTheme = AppTheme(TextTheme());
-
-    return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => ArCaptureNotifier()),
-          ChangeNotifierProvider(create: (context) => HomePageNotifier(AppRepository())),
-        ],
-        child: MaterialApp(
-          title: 'Reality Clone',
-          initialRoute: '/login',
-          routes: {
-            '/': (context) => HomePage(),
-            '/login': (context) => LoginPage(),
-            '/setting': (context) => SettingsPage(),
-            '/capture': (context) => ArCapture(),
-            '/capture/list': (context) => ArCapturePictureList(),
-          },
-          theme: materialTheme.light(),
-        ));
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Focal Length Example'),
+        ),
+        body: Center(
+          child: FutureBuilder<double>(
+            future: MyCustomPlugin.getFocalLength(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator();
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else {
+                return Text('Focal Length: ${snapshot.data}');
+              }
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
