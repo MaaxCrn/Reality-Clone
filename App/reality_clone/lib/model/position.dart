@@ -1,3 +1,5 @@
+import 'package:vector_math/vector_math_64.dart';
+
 class Position {
   double x;
   double y;
@@ -16,6 +18,14 @@ class Position {
 
   String asTxtString() {
     return "$x $y $z";
+  }
+
+  Vector3 toVector3() {
+    return Vector3(x, y, z);
+  }
+
+  double distanceTo(Position other) {
+    return toVector3().distanceTo(other.toVector3());
   }
 
 }
