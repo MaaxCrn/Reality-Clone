@@ -14,4 +14,8 @@ class Position {
     return "X: ${x.toStringAsFixed(decimals)}, Y: ${y.toStringAsFixed(decimals)}, Z: ${z.toStringAsFixed(decimals)}";
   }
 
+  String asTxtString() {
+    return "$x $y $z";
+  }
+
 }

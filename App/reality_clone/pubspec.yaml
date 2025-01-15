@@ -47,6 +47,7 @@ dependencies:
   provider: ^6.1.2
   my_custom_plugin:
     path: ./my_custom_plugin
+  vector_math: ^2.1.4
 
 dev_dependencies:
   flutter_test:
