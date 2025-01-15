@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
           : homeNotifier.models.isEmpty
           ? const Center(
         child: Text(
-          "Aucun modèle disponible.",
+          "No model available.",
           style: TextStyle(fontSize: 18, color: Colors.grey),
         ),
       )

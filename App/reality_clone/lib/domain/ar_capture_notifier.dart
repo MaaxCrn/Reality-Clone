@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:reality_clone/model/camera_info.dart';
 import 'package:reality_clone/repo/app_repository.dart';
+import 'package:my_custom_plugin/my_custom_plugin.dart';
 
 import '../model/capture_list.dart';
 import '../model/captured_image.dart';
@@ -45,13 +46,27 @@ class ArCaptureNotifier extends ChangeNotifier {
     }
   }
 
-  CameraInfo? _getCameraInfo() {
+  Future<CameraInfo?> _getCameraInfo() async {
     final sampleImage = _captureList.first();
-    if (sampleImage != null) {
-      return CameraInfo(imageWidth: sampleImage.imageWidth, imageHeight: sampleImage.imageHeight, fx: 1739, fy: 1739);
+    final focalLengths = await MyCustomPlugin.getFocalLengths();
+
+    print("Sample image details: ${sampleImage?.toString()}");
+    print("Focal lengths: $focalLengths");
+
+    if (sampleImage != null && focalLengths != null) {
+      final cameraInfo = CameraInfo(
+        imageWidth: sampleImage.imageWidth,
+        imageHeight: sampleImage.imageHeight,
+        fx: focalLengths['fx'] ?? 0.0,
+        fy: focalLengths['fy'] ?? 0.0,
+      );
+      print("CameraInfo created: $cameraInfo");
+      return cameraInfo;
     }
+    print("No valid sample image or focal lengths found.");
     return null;
   }
+
 
   void removeAtIndex(int index) {
     _captureList.removeAtIndex(index);

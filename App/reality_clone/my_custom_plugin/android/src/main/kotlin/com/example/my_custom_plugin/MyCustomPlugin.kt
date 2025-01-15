@@ -19,35 +19,41 @@ class MyCustomPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
   }
 
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-    if (call.method == "getFocalLength") {
-      result.success(getFocalLengthInPixels())
+    if (call.method == "getFocalLengths") {
+      val focalLengths = getFocalLengthsInPixels()
+      result.success(focalLengths) // Retourne un Map<String, Float>
     } else {
       result.notImplemented()
     }
   }
 
-  private fun getFocalLengthInPixels(): Float {
+
+  private fun getFocalLengthsInPixels(): Map<String, Float> {
     try {
       val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-      val cameraId = cameraManager.cameraIdList[0] // Default to the first camera
+      val cameraId = cameraManager.cameraIdList[0]
       val characteristics = cameraManager.getCameraCharacteristics(cameraId)
 
       val focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)
-      val focalLengthInMm = focalLengths?.getOrNull(0) ?: return 0.0f
+      val focalLengthInMm = focalLengths?.getOrNull(0) ?: return mapOf("fx" to 0.0f, "fy" to 0.0f)
 
       val sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE)
-      val sensorWidth = sensorSize?.width ?: return 0.0f
+      val sensorWidth = sensorSize?.width ?: return mapOf("fx" to 0.0f, "fy" to 0.0f)
+      val sensorHeight = sensorSize?.height ?: return mapOf("fx" to 0.0f, "fy" to 0.0f)
 
       val streamConfigurationMap = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
       val outputSizes = streamConfigurationMap?.getOutputSizes(android.graphics.ImageFormat.JPEG)
-      val resolutionWidth = outputSizes?.getOrNull(0)?.width ?: return 0.0f
+      val resolutionWidth = outputSizes?.getOrNull(0)?.width ?: return mapOf("fx" to 0.0f, "fy" to 0.0f)
+      val resolutionHeight = outputSizes?.getOrNull(0)?.height ?: return mapOf("fx" to 0.0f, "fy" to 0.0f)
 
-      return (focalLengthInMm * resolutionWidth) / sensorWidth
+      val fx = (focalLengthInMm * resolutionWidth) / sensorWidth
+      val fy = (focalLengthInMm * resolutionHeight) / sensorHeight
+
+      return mapOf("fx" to fx, "fy" to fy)
     } catch (e: Exception) {
       e.printStackTrace()
-      Log.e("MyCustomPlugin", "Error calculating focal length in pixels", e)
     }
-    return 0.0f
+    return mapOf("fx" to 0.0f, "fy" to 0.0f)
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
