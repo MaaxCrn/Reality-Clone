@@ -6,6 +6,7 @@ import android.hardware.camera2.CameraManager
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import android.util.Log
 
 class MyCustomPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
   private var channel: MethodChannel? = null
@@ -41,17 +42,13 @@ class MyCustomPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
       val outputSizes = streamConfigurationMap?.getOutputSizes(android.graphics.ImageFormat.JPEG)
       val resolutionWidth = outputSizes?.getOrNull(0)?.width ?: return 0.0f
 
-      println("Focal length (mm): $focalLengthInMm")
-      println("Sensor width (mm): $sensorWidth")
-      println("Resolution width (pixels): $resolutionWidth")
-
       return (focalLengthInMm * resolutionWidth) / sensorWidth
     } catch (e: Exception) {
       e.printStackTrace()
+      Log.e("MyCustomPlugin", "Error calculating focal length in pixels", e)
     }
     return 0.0f
   }
-
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     channel?.setMethodCallHandler(null)
