@@ -49,7 +49,7 @@ abstract class Api {
   @DELETE("image/delete/{id}")
   Future<HttpResponse> deleteGaussian(@Path("id") String id);
 
-  @GET("/ping")
+  @GET("/server/ping")
   Future<HttpResponse> ping();
 }
 

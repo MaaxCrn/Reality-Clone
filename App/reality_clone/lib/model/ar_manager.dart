@@ -30,6 +30,7 @@ class ArManager {
     _arSessionManager.onInitialize(
       showFeaturePoints: false,
       showPlanes: false,
+      showAnimatedGuide: false,
       showWorldOrigin: true,
       handleTaps: false,
     );

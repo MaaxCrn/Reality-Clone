@@ -68,7 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Server IP $isValidServer',
+              'Server IP',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),

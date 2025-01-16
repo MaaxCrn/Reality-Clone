@@ -133,7 +133,7 @@ class _Api implements Api {
     )
         .compose(
           _dio.options,
-          '/ping',
+          '/server/ping',
           queryParameters: queryParameters,
           data: _data,
         )
