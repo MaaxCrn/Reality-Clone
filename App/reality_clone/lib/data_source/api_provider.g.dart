@@ -70,7 +70,7 @@ class _Api implements Api {
     )
         .compose(
           _dio.options,
-          '/image/ping',
+          '/ping',
           queryParameters: queryParameters,
           data: _data,
         )

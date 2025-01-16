@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:reality_clone/data_source/api_provider.dart';
 import 'package:reality_clone/repo/app_repository.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -22,9 +23,11 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       savedValue = ip;
     });
+
+    Api.updateBaseUrl(ip);
+    final isValid = await AppRepository().pingServer();
     await AppRepository().saveIP(savedValue);
 
-    final isValid = await AppRepository().pingServer();
     setState(() {
       isValidServer = isValid;
     });
@@ -81,7 +84,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
             if(isValidServer)
               const Text(
-                'Server is reachable',
+                'Connection to server successful',
                 style: TextStyle(color: Colors.green),
               ),
             if(!isValidServer)

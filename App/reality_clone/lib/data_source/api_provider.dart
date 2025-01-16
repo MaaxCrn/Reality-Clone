@@ -9,26 +9,37 @@ final apiProvider = Api();
 
 @RestApi()
 abstract class Api {
+  static Dio? _dio;
+
   factory Api() {
-    final dio = Dio(
+    _dio ??= Dio(
       BaseOptions(
         baseUrl: "http://192.168.224.116:3000/",
-        contentType: "application/json"
+        contentType: "application/json",
       ),
     );
-    dio.interceptors.add(LogInterceptor(responseBody: true,
-        requestHeader: true, requestBody: true));
-    return _Api(dio);
+
+    _dio!.interceptors.add(LogInterceptor(
+      responseBody: true,
+      requestHeader: true,
+      requestBody: true,
+    ));
+
+    return _Api(_dio!);
   }
 
+  static void updateBaseUrl(String baseUrl) {
+    if (_dio != null) {
+      _dio!.options.baseUrl = baseUrl;
+    }
+  }
 
   @POST("image/compute-gaussian")
   @MultiPart()
   Future<HttpResponse> computeGaussian(
-      @Part(name: "file") File zipFile
+      @Part(name: "file") File zipFile,
       );
 
-
-  @GET("/image/ping")
+  @GET("/ping")
   Future<HttpResponse> ping();
 }
