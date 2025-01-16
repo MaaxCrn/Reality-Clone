@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Gallery'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.settings),
             onPressed: () {
               Navigator.pushNamed(context, '/setting');
             },

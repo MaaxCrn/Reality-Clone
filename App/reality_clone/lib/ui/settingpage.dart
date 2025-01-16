@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:reality_clone/repo/app_repository.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -6,6 +8,40 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+
+  final TextEditingController textController = TextEditingController();
+  String savedValue = "";
+
+
+
+
+
+
+
+  Future<void> autoSaveIp() async {
+    setState(() {
+      savedValue = textController.text;
+    });
+    await AppRepository().saveIP(savedValue);
+  }
+
+  Future<void> loadIp() async {
+    final ip = await AppRepository().getIP();
+    setState(() {
+      savedValue =  ip;
+      textController.text = ip;
+    });
+  }
+
+
+
+  @override
+  void initState() {
+    loadIp();
+    textController.addListener(autoSaveIp);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,11 +65,12 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 8),
             TextField(
+              controller: textController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                hintText: 'https://192.168.1.25',
+                hintText: 'ex: http://192.168.1.25:3000',
               ),
             ),
             const SizedBox(height: 24),
@@ -59,5 +96,13 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+
+  @override
+  void dispose() {
+    textController.removeListener(autoSaveIp);
+    textController.dispose();
+    super.dispose();
   }
 }
