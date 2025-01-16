@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:reality_clone/data_source/api_provider.dart';
 import 'package:reality_clone/model/gaussian_model.dart';
 import 'package:reality_clone/model/project.dart';
+import 'package:reality_clone/data_source/preferences_data_source.dart';
+import '../model/project.dart';
 
 final appRepository = AppRepository();
 
@@ -29,6 +31,26 @@ class AppRepository {
     } catch (e) {
       print("Error deleting Gaussian model: $e");
       throw Exception("Failed to delete Gaussian model");
+    }
+  }
+
+  Future<void> saveIP(String value) async {
+    await preferencesDataSource.saveIP(value);
+  }
+
+  Future<String> getIP() async {
+    return await preferencesDataSource.loadIP();
+  }
+
+  Future<bool> pingServer() async {
+    try {
+      final response = await apiProvider.ping();
+      if(response.response.statusCode == HttpStatus.ok)
+        return true;
+
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 }

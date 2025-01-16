@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:reality_clone/data_source/api_provider.dart';
+import 'package:reality_clone/repo/app_repository.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -6,6 +8,48 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+
+  final TextEditingController textController = TextEditingController();
+  String savedValue = "";
+  bool isValidServer = false;
+
+
+
+
+
+
+  Future<void> autoSaveIp() async {
+    final ip = textController.text;
+    setState(() {
+      savedValue = ip;
+    });
+
+    Api.updateBaseUrl(ip);
+    final isValid = await AppRepository().pingServer();
+    await AppRepository().saveIP(savedValue);
+
+    setState(() {
+      isValidServer = isValid;
+    });
+  }
+
+  Future<void> loadIp() async {
+    final ip = await AppRepository().getIP();
+    setState(() {
+      savedValue =  ip;
+      textController.text = ip;
+    });
+  }
+
+
+
+  @override
+  void initState() {
+    loadIp();
+    textController.addListener(autoSaveIp);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,18 +68,31 @@ class _SettingsPageState extends State<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Server IP',
+              'Server IP $isValidServer',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             TextField(
+              controller: textController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                hintText: 'https://192.168.1.25',
+                hintText: 'ex: http://192.168.1.25:3000',
               ),
             ),
+
+            if(isValidServer)
+              const Text(
+                'Connection to server successful',
+                style: TextStyle(color: Colors.green),
+              ),
+            if(!isValidServer)
+              const Text(
+                'Server is not reachable',
+                style: TextStyle(color: Colors.red),
+              ),
+
             const SizedBox(height: 24),
             Text(
               'About',
@@ -59,5 +116,13 @@ class _SettingsPageState extends State<SettingsPage> {
         ),
       ),
     );
+  }
+
+
+  @override
+  void dispose() {
+    textController.removeListener(autoSaveIp);
+    textController.dispose();
+    super.dispose();
   }
 }

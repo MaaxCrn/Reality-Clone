@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:provider/provider.dart';
+import 'package:reality_clone/data_source/api_provider.dart';
 import 'package:reality_clone/domain/ar_capture_notifier.dart';
 import 'package:reality_clone/domain/homepage_notifier.dart';
 import 'package:reality_clone/repo/app_repository.dart';
@@ -10,8 +11,10 @@ import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
 import 'package:reality_clone/ui/homepage/homepage.dart';
 import 'package:reality_clone/ui/settingpage.dart';
 
-void main() {
+void main() async {
   runApp(const RealityCloneApp());
+  final ip = await appRepository.getIP();
+  Api.updateBaseUrl(ip);
 }
 
 class RealityCloneApp extends StatelessWidget {
