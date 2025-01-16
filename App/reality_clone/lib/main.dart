@@ -7,7 +7,7 @@ import 'package:reality_clone/repo/app_repository.dart';
 import 'package:reality_clone/theme/app_theme.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
-import 'package:reality_clone/ui/homepage.dart';
+import 'package:reality_clone/ui/homepage/homepage.dart';
 import 'package:reality_clone/ui/settingpage.dart';
 
 void main() {

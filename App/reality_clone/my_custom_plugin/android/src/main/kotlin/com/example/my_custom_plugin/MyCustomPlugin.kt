@@ -28,7 +28,7 @@ class MyCustomPlugin : FlutterPlugin, MethodChannel.MethodCallHandler {
   private fun getFocalLengthInPixels(): Float {
     try {
       val cameraManager = context.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-      val cameraId = cameraManager.cameraIdList[0] // Default to the first camera
+      val cameraId = cameraManager.cameraIdList[0]
       val characteristics = cameraManager.getCameraCharacteristics(cameraId)
 
       val focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS)

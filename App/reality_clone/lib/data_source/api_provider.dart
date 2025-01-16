@@ -33,5 +33,6 @@ abstract class Api {
   @GET("image")
   Future<List<GaussianModel>> getGaussianList();
 
-
+  @DELETE("image/delete/{id}")
+  Future<HttpResponse> deleteGaussian(@Path("id") String id);
 }

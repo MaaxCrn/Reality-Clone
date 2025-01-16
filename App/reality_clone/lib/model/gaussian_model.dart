@@ -6,17 +6,17 @@ class GaussianModel {
 
   GaussianModel({
     required this.id,
-    required this.name,
-    required this.date,
-    required this.pathImage,
+    this.name = "Unknown Name",
+    this.date = "Unknown Date",
+    this.pathImage = "",
   });
 
   factory GaussianModel.fromJson(Map<String, dynamic> json) {
     return GaussianModel(
-      id: json['id'],
-      name: json['name'],
-      date: json['date'],
-      pathImage: json['pathImage'],
+      id: json['id'] ?? 0,
+      name: json['name'] ?? "Unknown Name",
+      date: json['date'] ?? "Unknown Date",
+      pathImage: json['pathImage'] ?? "",
     );
   }
 }
