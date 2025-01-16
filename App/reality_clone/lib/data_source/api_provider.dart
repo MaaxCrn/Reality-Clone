@@ -16,7 +16,7 @@ abstract class Api {
   factory Api() {
     _dio ??= Dio(
       BaseOptions(
-        baseUrl: "http://192.168.224.116:3000/",
+        baseUrl: "http://192.168.40.116:3000/",
         contentType: "application/json",
       ),
     );
@@ -32,7 +32,7 @@ abstract class Api {
 
   static void updateBaseUrl(String baseUrl) {
     if (_dio != null) {
-      _dio!.options.baseUrl = baseUrl;
+      _dio!.options.baseUrl = "$baseUrl/";
     }
   }
 
