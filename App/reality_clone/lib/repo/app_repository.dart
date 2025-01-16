@@ -28,6 +28,18 @@ class AppRepository {
     return await preferencesDataSource.loadIP();
   }
 
+  Future<bool> pingServer() async {
+    try {
+      final response = await apiProvider.ping();
+      if(response.response.statusCode == HttpStatus.ok)
+        return true;
+
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
 
 
 

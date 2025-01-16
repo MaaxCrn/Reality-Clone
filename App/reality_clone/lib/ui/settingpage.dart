@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:reality_clone/repo/app_repository.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -11,7 +10,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   final TextEditingController textController = TextEditingController();
   String savedValue = "";
-
+  bool isValidServer = false;
 
 
 
@@ -19,10 +18,16 @@ class _SettingsPageState extends State<SettingsPage> {
 
 
   Future<void> autoSaveIp() async {
+    final ip = textController.text;
     setState(() {
-      savedValue = textController.text;
+      savedValue = ip;
     });
     await AppRepository().saveIP(savedValue);
+
+    final isValid = await AppRepository().pingServer();
+    setState(() {
+      isValidServer = isValid;
+    });
   }
 
   Future<void> loadIp() async {
@@ -60,7 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Server IP',
+              'Server IP $isValidServer',
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
@@ -73,6 +78,18 @@ class _SettingsPageState extends State<SettingsPage> {
                 hintText: 'ex: http://192.168.1.25:3000',
               ),
             ),
+
+            if(isValidServer)
+              const Text(
+                'Server is reachable',
+                style: TextStyle(color: Colors.green),
+              ),
+            if(!isValidServer)
+              const Text(
+                'Server is not reachable',
+                style: TextStyle(color: Colors.red),
+              ),
+
             const SizedBox(height: 24),
             Text(
               'About',

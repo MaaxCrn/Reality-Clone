@@ -28,4 +28,7 @@ abstract class Api {
       @Part(name: "file") File zipFile
       );
 
+
+  @GET("/image/ping")
+  Future<HttpResponse> ping();
 }
