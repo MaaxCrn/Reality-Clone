@@ -8,8 +8,8 @@ class MyCustomPlugin {
     return MyCustomPluginPlatform.instance.getPlatformVersion();
   }
 
-  static Future<Map<String, double>?> getFocalLengths() async {
-    final result = await _channel.invokeMapMethod<String, double>('getFocalLengths');
-    return result;
+  static Future<double> getFocalLength() async {
+    final double focalLength = await _channel.invokeMethod('getFocalLength');
+    return focalLength;
   }
 }

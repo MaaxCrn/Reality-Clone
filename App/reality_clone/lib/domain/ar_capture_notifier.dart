@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:my_custom_plugin/my_custom_plugin.dart';
 import 'package:reality_clone/model/camera_info.dart';
 import 'package:reality_clone/repo/app_repository.dart';
-import 'package:my_custom_plugin/my_custom_plugin.dart';
 
 import '../model/capture_list.dart';
 import '../model/captured_image.dart';
@@ -36,7 +36,7 @@ class ArCaptureNotifier extends ChangeNotifier {
 
   Future<void> saveAndSendImages() async {
     if (hasEnoughImages()) {
-      final cameraInfo = _getCameraInfo();
+      final cameraInfo = await _getCameraInfo();
       if (cameraInfo == null) throw Exception("Camera info is null");
 
       _captureList.archive.addCameraInfo(cameraInfo);
@@ -48,25 +48,23 @@ class ArCaptureNotifier extends ChangeNotifier {
 
   Future<CameraInfo?> _getCameraInfo() async {
     final sampleImage = _captureList.first();
-    final focalLengths = await MyCustomPlugin.getFocalLengths();
+    if (sampleImage != null) {
+      try {
+        final double focalLength = await MyCustomPlugin.getFocalLength();
 
-    print("Sample image details: ${sampleImage?.toString()}");
-    print("Focal lengths: $focalLengths");
-
-    if (sampleImage != null && focalLengths != null) {
-      final cameraInfo = CameraInfo(
-        imageWidth: sampleImage.imageWidth,
-        imageHeight: sampleImage.imageHeight,
-        fx: focalLengths['fx'] ?? 0.0,
-        fy: focalLengths['fy'] ?? 0.0,
-      );
-      print("CameraInfo created: $cameraInfo");
-      return cameraInfo;
+        return CameraInfo(
+          imageWidth: sampleImage.imageWidth,
+          imageHeight: sampleImage.imageHeight,
+          fx: focalLength,
+          fy: focalLength,
+        );
+      } catch (e) {
+        print("Error retrieving focal length: $e");
+      }
     }
-    print("No valid sample image or focal lengths found.");
+    print("No valid sample image or focal length found.");
     return null;
   }
-
 
   void removeAtIndex(int index) {
     _captureList.removeAtIndex(index);
