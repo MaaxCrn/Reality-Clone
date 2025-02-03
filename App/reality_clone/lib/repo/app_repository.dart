@@ -10,8 +10,8 @@ import '../model/project.dart';
 final appRepository = AppRepository();
 
 class AppRepository {
-  Future<void> computeGaussian(File zipFile) async {
-    await apiProvider.computeGaussian(zipFile);
+  Future<void> computeGaussian(File zipFile, String projectName, bool useArPositions) async {
+    await apiProvider.computeGaussian(zipFile, projectName, useArPositions);
   }
 
   Future<List<GaussianModel>> getGaussianList() async {

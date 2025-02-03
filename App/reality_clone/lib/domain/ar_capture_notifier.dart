@@ -24,9 +24,9 @@ class ArCaptureNotifier extends ChangeNotifier {
   }
 
 
-  Future<void> _sendArchive() async {
+  Future<void> _sendArchive(String projectName, bool useArPositions) async {
     final archive = await _captureList.getZipFile();
-    await AppRepository().computeGaussian(archive);
+    await AppRepository().computeGaussian(archive, projectName, useArPositions);
   }
 
 
@@ -34,15 +34,17 @@ class ArCaptureNotifier extends ChangeNotifier {
     return _captureList.length >= MIN_IMAGE_COUNT;
   }
 
-  Future<void> saveAndSendImages() async {
+  Future<void> saveAndSendImages(String projectName, bool useArPositions) async {
     if (hasEnoughImages()) {
-      final cameraInfo = await _getCameraInfo();
-      if (cameraInfo == null) throw Exception("Camera info is null");
+      if(useArPositions) {
+        final cameraInfo = await _getCameraInfo();
+        if (cameraInfo == null) throw Exception("Camera info is null");
 
-      _captureList.archive.addCameraInfo(cameraInfo);
-      _captureList.archive.addPoints3DFile();
-      _captureList.archive.addImagesFile(_captureList.capturedImages);
-      await _sendArchive();
+        _captureList.archive.addCameraInfo(cameraInfo);
+        _captureList.archive.addPoints3DFile();
+        _captureList.archive.addImagesFile(_captureList.capturedImages);
+      }
+      await _sendArchive(projectName, useArPositions);
     }
   }
 

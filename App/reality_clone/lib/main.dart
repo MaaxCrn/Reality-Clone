@@ -8,6 +8,7 @@ import 'package:reality_clone/repo/app_repository.dart';
 import 'package:reality_clone/theme/app_theme.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
+import 'package:reality_clone/ui/ar_capture/images_list/ar_catpure_send.dart';
 import 'package:reality_clone/ui/homepage/homepage.dart';
 import 'package:reality_clone/ui/settingpage.dart';
 
@@ -37,6 +38,7 @@ class RealityCloneApp extends StatelessWidget {
             '/setting': (context) => SettingsPage(),
             '/capture': (context) => ArCapture(),
             '/capture/list': (context) => ArCapturePictureList(),
+            '/capture/send': (context) => ArCatpureSendPage(),
           },
           theme: materialTheme.light(),
         ));

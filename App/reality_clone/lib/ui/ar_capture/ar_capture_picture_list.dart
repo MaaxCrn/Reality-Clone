@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:reality_clone/ui/ar_capture/images_list/ar_catpure_send.dart';
 import 'package:reality_clone/ui/ar_capture/images_list/save_button.dart';
 
 import '../../domain/ar_capture_notifier.dart';
@@ -13,23 +14,15 @@ class ArCapturePictureList extends StatefulWidget {
 }
 
 class _ArCapturePictureListState extends State<ArCapturePictureList> {
-  final ValueNotifier<bool> _isSaving = ValueNotifier(false);
 
   Future<void> onSaveImagesButtonPressed() async {
-    if(_isSaving.value) return;
-    _isSaving.value = true;
 
     final arCaptureNotifier = context.read<ArCaptureNotifier>();
     if (arCaptureNotifier.hasEnoughImages()) {
-      try {
-        await arCaptureNotifier.saveAndSendImages();
-      } catch (e) {
-        print('Error saving images: $e');
-      }
+      Navigator.pushNamed(context, "/capture/send");
     } else {
       _showMinimumImagesCountNotSatisfiedDialog();
     }
-    _isSaving.value = false;
 
   }
 
@@ -93,14 +86,10 @@ class _ArCapturePictureListState extends State<ArCapturePictureList> {
                   );
                 },
               ),
-        floatingActionButton: ValueListenableBuilder<bool>(
-          valueListenable: _isSaving,
-          builder: (context, isSaving, child) {
-            return SaveButton(
-              isSaving: isSaving,
-              onPressed: onSaveImagesButtonPressed,
-            );
-          },
+        floatingActionButton: FloatingActionButton(
+          onPressed: onSaveImagesButtonPressed,
+          tooltip: 'Save all images',
+          child: const Icon(Icons.save),
         ));
   }
 }

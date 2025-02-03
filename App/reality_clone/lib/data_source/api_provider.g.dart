@@ -22,7 +22,11 @@ class _Api implements Api {
   final ParseErrorLogger? errorLogger;
 
   @override
-  Future<HttpResponse<dynamic>> computeGaussian(File zipFile) async {
+  Future<HttpResponse<dynamic>> computeGaussian(
+    File zipFile,
+    String projectName,
+    bool useArPositions,
+  ) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{};
     final _headers = <String, dynamic>{};
@@ -33,6 +37,14 @@ class _Api implements Api {
         zipFile.path,
         filename: zipFile.path.split(Platform.pathSeparator).last,
       ),
+    ));
+    _data.fields.add(MapEntry(
+      'projectName',
+      projectName,
+    ));
+    _data.fields.add(MapEntry(
+      'useArPositions',
+      useArPositions.toString(),
     ));
     final _options = _setStreamType<HttpResponse<dynamic>>(Options(
       method: 'POST',

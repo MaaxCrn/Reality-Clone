@@ -40,7 +40,8 @@ abstract class Api {
   @MultiPart()
   Future<HttpResponse> computeGaussian(
       @Part(name: "file") File zipFile,
-      );
+      @Part(name: "projectName") String projectName,
+      @Part(name: "useArPositions") bool useArPositions);
 
 
   @GET("image")
