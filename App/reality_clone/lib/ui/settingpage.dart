@@ -10,7 +10,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
 
   final TextEditingController textController = TextEditingController();
-  String savedValue = "";
   bool isValidServer = false;
 
 
@@ -20,12 +19,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<void> autoSaveIp() async {
     final ip = textController.text;
-    setState(() {
-      savedValue = ip;
-    });
 
     try {
       Api.updateBaseUrl(ip);
+      await AppRepository().saveIP(ip);
 
       final isValid = await AppRepository().pingServer();
       setState(() {
@@ -36,15 +33,13 @@ class _SettingsPageState extends State<SettingsPage> {
         isValidServer = false;
       });
     }
-    await AppRepository().saveIP(savedValue);
-    
+
   }
 
   Future<void> loadIp() async {
     final ip = await AppRepository().getIP();
     print("Loaded IP: $ip");
     setState(() {
-      savedValue =  ip;
       textController.text = ip;
     });
   }
