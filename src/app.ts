@@ -1,5 +1,6 @@
 // src/index.ts
 import express, { Application } from 'express';
+import path from "path";
 import { RegisterRoutes } from './routes';
 
 import swaggerUi from "swagger-ui-express";
@@ -29,6 +30,7 @@ sequelize.sync({ force: true }).then(() => {
 RegisterRoutes(app);
 
 app.use(errorHandler);
+app.use("/static", express.static(path.resolve("./output/")));
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });

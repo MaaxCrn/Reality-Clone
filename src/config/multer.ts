@@ -1,3 +1,4 @@
+import { log } from "console";
 import fs from "fs";
 import multer from "multer";
 import path from "path";
@@ -17,7 +18,8 @@ export const upload = multer({
         },
     }),
     fileFilter: (req, file, cb) => {
-        if (file.mimetype === "application/zip" || file.mimetype === "application/x-zip-compressed") {
+        log(file);
+        if (file.mimetype === "application/zip" || file.mimetype === "application/x-zip-compressed" || file.mimetype === "application/octet-stream") {
             cb(null, true);
         } else {
             cb(new Error("Le fichier doit être au format ZIP."));

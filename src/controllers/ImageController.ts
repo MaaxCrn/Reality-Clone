@@ -1,6 +1,7 @@
 import express from "express";
-import { Controller, Post, Request, Route, Tags } from 'tsoa';
+import { Controller, Delete, Get, Post, Request, Res, Route, Tags, TsoaResponse } from 'tsoa';
 import { upload } from '../config/multer';
+import { GeneratedModelDTO } from "../dto/generatedModel.dto";
 import { imageService } from "../services/ImageService";
 
 
@@ -23,5 +24,47 @@ export class ImageController extends Controller {
         resolve(request.file as Express.Multer.File);
       });
     });
+  }
+
+  @Get("/")
+  public async getGeneratedModel(): Promise<GeneratedModelDTO[]> {
+    return imageService.getGeneratedModels();
+  }
+
+  @Get("/{id}")
+  public async getGaussianById(
+    @Request() request: express.Request,
+    id: number,
+    @Res() response: TsoaResponse<404 | 500, { message: string }>
+  ): Promise<void> {
+    try {
+      const filePath = await imageService.getGaussianById(id);
+
+      if (!filePath) {
+        return response(404, { message: "Fichier non trouvé" });
+      }
+
+      request.res!.setHeader("Content-Type", "application/octet-stream");
+      request.res!.setHeader("Content-Disposition", `attachment; filename="gaussian_model_${id}.ply"`);
+
+      request.res!.sendFile(filePath, (err) => {
+        if (err) {
+          return response(500, { message: "Erreur lors de l'envoi du fichier" });
+        }
+      });
+    } catch (error) {
+      return response(500, { message: "Erreur serveur" });
+    }
+  }
+
+  @Delete("delete/{id}")
+  public async deleteGeneratedModel(id: number): Promise<{ message: string }> {
+    const result = await imageService.deleteGeneratedModelById(id);
+
+    if (result) {
+      return { message: `Model with ID ${id} has been deleted.` };
+    } else {
+      return { message: `Model with ID ${id} not found.` };
+    }
   }
 }

@@ -9,6 +9,7 @@ export interface GeneratedModelAttributes {
     image: string;
     plyDirectory: string;
     public: boolean;
+    date: Date;
     userId: number;
 }
 
@@ -19,7 +20,7 @@ export class GeneratedModelEntity extends Model<GeneratedModelAttributes> implem
     public plyDirectory!: string;
     public public!: boolean;
     public userId!: number;
-
+    public date!: Date;
     public user?: User;
 }
 
@@ -45,6 +46,10 @@ GeneratedModelEntity.init(
         public: {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
+        },
+        date: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW,
         },
         userId: {
             type: DataTypes.INTEGER,

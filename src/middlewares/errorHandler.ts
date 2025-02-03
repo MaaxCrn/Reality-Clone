@@ -13,7 +13,6 @@ const errorHandler = (
     res: Response,
     next: NextFunction
 ): void => {
-    console.log("Test");
     console.error("An error occurred:", err);
 
     // Définir un statut d'erreur par défaut
