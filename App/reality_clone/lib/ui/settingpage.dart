@@ -24,17 +24,25 @@ class _SettingsPageState extends State<SettingsPage> {
       savedValue = ip;
     });
 
-    Api.updateBaseUrl(ip);
-    final isValid = await AppRepository().pingServer();
-    await AppRepository().saveIP(savedValue);
+    try {
+      Api.updateBaseUrl(ip);
 
-    setState(() {
-      isValidServer = isValid;
-    });
+      final isValid = await AppRepository().pingServer();
+      setState(() {
+        isValidServer = isValid;
+      });
+    } catch (e) {
+      setState(() {
+        isValidServer = false;
+      });
+    }
+    await AppRepository().saveIP(savedValue);
+    
   }
 
   Future<void> loadIp() async {
     final ip = await AppRepository().getIP();
+    print("Loaded IP: $ip");
     setState(() {
       savedValue =  ip;
       textController.text = ip;
