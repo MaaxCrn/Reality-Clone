@@ -42,11 +42,11 @@ export class ImageService {
 
         const query = ["activate", "gaussian_splatting", "&&",
             ...this.loadColmapPoints(path), "&&",
-            "python", "D:\\Mathis\\sae\\gaussian-splatting\\train.py -s", path,
+            constants.LOCAL_PATHS.python, `${constants.LOCAL_PATHS.gaussianSplattingDirectory}\\train.py -s`, path,
             "--output_directory", generationId,
             "--port", port.toString()];
 
-        const process = spawn("conda", query, { shell: true });
+        const process = spawn(constants.LOCAL_PATHS.conda, query, { shell: true });
 
 
         process.stderr.on("data", (data) => {
@@ -76,7 +76,7 @@ export class ImageService {
         const imagePath = `${extractedFilePath}\\images`;
         const dbPath = `${extractedFilePath}\\database.db`;
 
-        const colmap = "D:\\Mathis\\sae\\realityclonegithub\\libs\\colmap\\bin\\colmap";
+        const colmap = constants.LOCAL_PATHS.colmap;
         const commande1 = `${colmap} feature_extractor --database_path "${dbPath}" --image_path "${imagePath}" --ImageReader.camera_model PINHOLE --ImageReader.single_camera 1`;
         const commande2 = `${colmap} exhaustive_matcher --database_path "${dbPath}"`;
         //const commande3 = `${colmap} point_triangulator --database_path "${dbPath}" --image_path "${imagePath}" --input_path "${extractedFilePath}\\sparse" --output_path "${extractedFilePath}"\\sparse\\0`;
