@@ -1,117 +1,116 @@
-import { spawn } from "child_process";
+import { spawn } from 'child_process';
 import fs from 'fs';
 
-import AdmZip from "adm-zip";
-import path from "path";
-import portfinder from "portfinder";
-import constants from "../config/constants";
-import { badRequest } from "../error/BadRequestError";
-import { GeneratedModelEntity } from "../models/GeneratedModel";
-import { WaitingModel } from "../models/WaitingModel";
+import AdmZip from 'adm-zip';
+import path from 'path';
+import portfinder from 'portfinder';
+import constants from '../config/constants';
+import { badRequest } from '../error/BadRequestError';
+import { GeneratedModelEntity } from '../models/GeneratedModel';
+import { WaitingModel } from '../models/WaitingModel';
+import { colmapService } from './ColmapService';
 
-const KEEP_FILES = false;
+const KEEP_FILES = true;
 
 export class ImageService {
-    public async computeGaussianForFile(file: Express.Multer.File) {
+    public async computeGaussianForFile(file: Express.Multer.File, projectName: string, useArPositions: boolean): Promise<string> {
         await this.checkValidity();
 
-        const extractedPath = path.join(__dirname, "../../extracted", path.basename(file.filename, ".zip"));
+        const extractedPath = path.join(__dirname, '../../extracted', path.basename(file.filename, '.zip'));
         const zip = new AdmZip(file.path);
 
         try {
             zip.extractAllTo(extractedPath, true);
-            this.computeGaussianAt(extractedPath);
+            this.computeGaussianAt(extractedPath, projectName, useArPositions);
 
-            return "Fichier reçu avec succès !"
+            return 'Fichier reçu avec succès !';
         } catch (error) {
-            console.error("Erreur lors de la décompression :", error);
-            throw new Error("Impossible de décompresser le fichier.");
+            console.error('Erreur lors de la décompression :', error);
+            throw new Error('Impossible de décompresser le fichier.');
         } finally {
-            //fs.rm(file.path, () => { })
+            fs.rm(file.path, () => {
+            });
         }
     }
 
-    private async computeGaussianAt(path: string) {
+    private async computeGaussianAt(path: string, projectName: string, useArPositions: boolean) {
         const waitingModel = await WaitingModel.create({
             imageDirectory: path,
-            userId: 1
+            userId: 1,
         });
 
-        const generationId = "output" + waitingModel.id.toString();
+        const generationId = `${projectName}-output${waitingModel.id}`;
         const port = await portfinder.getPortPromise(constants.PORT_CONFIG);
 
-        const query = ["activate", "gaussian_splatting", "&&",
-            ...this.loadColmapPoints(path), "&&",
-            constants.LOCAL_PATHS.python, `${constants.LOCAL_PATHS.gaussianSplattingDirectory}\\train.py -s`, path,
-            "--output_directory", generationId,
-            "--port", port.toString()];
+        const colmapCommands = useArPositions ?
+            colmapService.getComputeSparseFromKnownPosesCommands(path) :
+            colmapService.getComputeSparseWithoutPosesCommands(path);
+
+        console.log('Commandes Colmap :', colmapCommands);
+
+
+        const query = ['activate', 'gaussian_splatting', '&&',
+            ...colmapCommands,
+            ' && ',
+            constants.LOCAL_PATHS.python, `${constants.LOCAL_PATHS.gaussianSplattingDirectory}\\train.py`,
+            `-s "${path}"`,
+            `--output_directory "${generationId}"`,
+            `--port ${port}`];
 
         const process = spawn(constants.LOCAL_PATHS.conda, query, { shell: true });
 
 
-        process.stderr.on("data", (data) => {
+        process.stderr.on('data', (data) => {
             console.error(`Erreur : ${data.toString()}`);
         });
 
-        process.stdout.on("data", (data) => {
+        process.stdout.on('data', (data) => {
             console.log(`Sortie : ${data.toString()}`);
         });
 
-        process.on("close", (code) => {
+        process.on('close', (code) => {
             waitingModel.destroy();
 
             if (code === 0) {
-                this.onGenerationSuccess(path, generationId);
+                this.onGenerationSuccess(path, generationId, projectName);
             } else {
                 this.onGenerationFail(generationId);
             }
 
             if (!KEEP_FILES) {
-                //fs.rm(path, { recursive: true, force: true }, () => { });
+                fs.rm(path, { recursive: true, force: true }, () => {
+                });
             }
         });
     }
 
-    private loadColmapPoints(extractedFilePath: string): string[] {
-        const imagePath = `${extractedFilePath}\\images`;
-        const dbPath = `${extractedFilePath}\\database.db`;
 
-        const colmap = constants.LOCAL_PATHS.colmap;
-        const commande1 = `${colmap} feature_extractor --database_path "${dbPath}" --image_path "${imagePath}" --ImageReader.camera_model PINHOLE --ImageReader.single_camera 1`;
-        const commande2 = `${colmap} exhaustive_matcher --database_path "${dbPath}"`;
-        //const commande3 = `${colmap} point_triangulator --database_path "${dbPath}" --image_path "${imagePath}" --input_path "${extractedFilePath}\\sparse" --output_path "${extractedFilePath}"\\sparse\\0`;
-
-        const commande3 = `${colmap} mapper --database_path "${dbPath}" --image_path "${imagePath}" --output_path "${extractedFilePath}"\\sparse --Mapper.ba_refine_focal_length 0 --Mapper.ba_refine_principal_point 0 --Mapper.ba_refine_extra_params 0`;
-
-        return [commande1, "&&", commande2, "&&", commande3];
-    }
-
-    private async onGenerationSuccess(directory: string, generationId: string) {
-        const imageDirectory = directory + "/images";
-        const outputDirectory = "./output/" + generationId;
-        const name = "output" + generationId;
+    private async onGenerationSuccess(directory: string, generationId: string, projectName: string) {
+        const imageDirectory = directory + '/images';
+        const outputDirectory = './output/' + generationId;
         const files = fs.readdirSync(imageDirectory);
-        const imagePath = `${outputDirectory}/image.${files[0].split(".").pop()}`
-        fs.renameSync(imageDirectory + "/" + files[0], imagePath);
+        const imagePath = `${outputDirectory}/image.${files[0].split('.').pop()}`;
+        fs.renameSync(imageDirectory + '/' + files[0], imagePath);
 
         GeneratedModelEntity.create({
-            name: name,
+            name: projectName,
             image: imagePath,
             plyDirectory: outputDirectory,
             public: true,
             userId: 1,
-            date: new Date()
+            date: new Date(),
         });
     }
 
     private async onGenerationFail(generationId: string) {
-        const outputDirectory = "./output/" + generationId;
+        const outputDirectory = './output/' + generationId;
 
         if (!KEEP_FILES) {
-            console.log("La génération a échoué, suppression du dossier de sortie.");
-            //fs.rm(outputDirectory, { recursive: true, force: true }, () => { });
+            console.log('La génération a échoué, suppression du dossier de sortie.');
+            fs.rm(outputDirectory, { recursive: true, force: true }, () => {
+            });
         } else {
-            console.log("La génération a échoué");
+            console.log('La génération a échoué');
         }
     }
 
@@ -120,7 +119,7 @@ export class ImageService {
         console.log(amount);
 
         if (amount >= constants.MAX_CONCURRENT_GENERATIONS) {
-            badRequest("Il y a déjà des générations en cours")
+            badRequest('Il y a déjà des générations en cours');
         }
     }
 
@@ -128,8 +127,8 @@ export class ImageService {
         return await GeneratedModelEntity.findAll({
             where: {
                 public: true,
-                userId: 1
-            }
+                userId: 1,
+            },
         });
     }
 
@@ -137,8 +136,8 @@ export class ImageService {
         return await GeneratedModelEntity.findOne({
             where: {
                 id,
-                userId: 1
-            }
+                userId: 1,
+            },
         });
     }
 
@@ -151,8 +150,10 @@ export class ImageService {
                     const directoryPath = path.resolve(model.plyDirectory);
 
                     try {
-                        await fs.access(directoryPath, () => { });
-                        //await fs.rm(directoryPath, { recursive: true, force: true }, () => { });
+                        await fs.access(directoryPath, () => {
+                        });
+                        await fs.rm(directoryPath, { recursive: true, force: true }, () => {
+                        });
                         console.log(`Dossier ${directoryPath} supprimé.`);
                     } catch (err) {
                         console.warn(`Le dossier ${directoryPath} n'existe pas ou est déjà supprimé.`);
@@ -163,7 +164,7 @@ export class ImageService {
                 return true;
 
             } catch (error) {
-                console.error("Erreur lors de la suppression :", error);
+                console.error('Erreur lors de la suppression :', error);
                 return false;
             }
         }

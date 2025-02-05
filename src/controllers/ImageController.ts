@@ -3,6 +3,7 @@ import { Controller, Delete, Get, Post, Request, Res, Route, Tags, TsoaResponse 
 import { upload } from '../config/multer';
 import { GeneratedModelDTO } from "../dto/generatedModel.dto";
 import { imageService } from "../services/ImageService";
+import { boolean } from 'joi';
 
 
 @Tags("Image")
@@ -12,7 +13,11 @@ export class ImageController extends Controller {
   @Post("/compute-gaussian")
   public async computeGaussian(@Request() request: express.Request): Promise<string> {
     const file = await this.handleFile(request);
-    return imageService.computeGaussianForFile(file);
+
+    const name = request.body.projectName as string;
+    const useArPositions = request.body.useArPositions == "true";
+
+    return imageService.computeGaussianForFile(file, name, useArPositions);
   }
 
   private handleFile(request: express.Request): Promise<Express.Multer.File> {
