@@ -1,9 +1,9 @@
 import express from "express";
-import { Controller, Delete, Get, Post, Request, Res, Route, Tags, TsoaResponse } from 'tsoa';
+import {Body, Controller, Delete, Get, Post, Request, Res, Route, Tags, TsoaResponse} from 'tsoa';
 import { upload } from '../config/multer';
 import { GeneratedModelDTO } from "../dto/generatedModel.dto";
 import { imageService } from "../services/ImageService";
-import { boolean } from 'joi';
+import {GeneratedModelAttributes} from "../models/GeneratedModel";
 
 
 @Tags("Image")
@@ -71,5 +71,13 @@ export class ImageController extends Controller {
     } else {
       return { message: `Model with ID ${id} not found.` };
     }
+  }
+
+
+  @Post("/add-gaussian")
+  public async addGaussian(@Body() req: GeneratedModelAttributes): Promise<string> {
+    const {name, plyDirectory, image, userId}= req;
+    await imageService.addGaussian(name, plyDirectory, image, userId);
+    return "gg";
   }
 }

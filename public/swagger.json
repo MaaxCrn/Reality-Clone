@@ -32,6 +32,44 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"GeneratedModelAttributes": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"name": {
+						"type": "string"
+					},
+					"image": {
+						"type": "string"
+					},
+					"plyDirectory": {
+						"type": "string"
+					},
+					"public": {
+						"type": "boolean"
+					},
+					"date": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"userId": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"name",
+					"image",
+					"plyDirectory",
+					"public",
+					"date",
+					"userId"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -247,6 +285,38 @@
 						}
 					}
 				]
+			}
+		},
+		"/image/add-gaussian": {
+			"post": {
+				"operationId": "AddGaussian",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "string"
+								}
+							}
+						}
+					}
+				},
+				"tags": [
+					"Image"
+				],
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/GeneratedModelAttributes"
+							}
+						}
+					}
+				}
 			}
 		}
 	},

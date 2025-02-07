@@ -187,6 +187,16 @@ export class ImageService {
         }
     }
 
+    public async addGaussian(name: string, plyDirectory: string, image: string, userId: number) {
+        GeneratedModelEntity.create({
+            name,
+            plyDirectory,
+            image,
+            public: true,
+            userId,
+            date: new Date(),
+        });
+    }
 
 }
 
