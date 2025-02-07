@@ -10,7 +10,7 @@ import { GeneratedModelEntity } from '../models/GeneratedModel';
 import { WaitingModel } from '../models/WaitingModel';
 import { colmapService } from './ColmapService';
 
-const KEEP_FILES = true;
+const KEEP_FILES = false;
 
 export class ImageService {
     public async computeGaussianForFile(file: Express.Multer.File, projectName: string, useArPositions: boolean): Promise<string> {
