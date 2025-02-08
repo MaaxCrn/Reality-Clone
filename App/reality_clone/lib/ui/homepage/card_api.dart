@@ -12,7 +12,7 @@ class CardApi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
@@ -27,7 +27,7 @@ class CardApi extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    photo.pathImage ?? '',
+                    photo.imageUrl ?? '',
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: 200, // Adjust as necessary

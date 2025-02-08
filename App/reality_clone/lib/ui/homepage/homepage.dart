@@ -9,6 +9,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  void refresh() {
+    final homeNotifier = context.read<HomePageNotifier>();
+    homeNotifier.fetchGaussianList();
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
@@ -24,6 +31,12 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: const Text('Gallery'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              refresh();
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {

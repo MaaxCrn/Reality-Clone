@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reality_clone/repo/app_repository.dart';
+import 'package:reality_clone/services/file_service.dart';
 import '../model/gaussian_model.dart';
 
 class HomePageNotifier extends ChangeNotifier {
@@ -17,7 +18,16 @@ class HomePageNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _models = await api.getGaussianList();
+      final list = await api.getGaussianList();
+
+      final ip = await appRepository.getIP();
+      print(ip);
+      for (final model in list) {
+        model.imageUrl = ip + "/static/" +  FileService().removeFirstDirectory(model.imageUrl);
+        print(model.imageUrl);
+      }
+
+      _models = list;
     } catch (e) {
       debugPrint("Error fetching Gaussian models: $e");
     } finally {
