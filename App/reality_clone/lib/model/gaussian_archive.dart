@@ -67,6 +67,7 @@ class GaussianArchive {
   }
 
   void clear() {
-    _archive.clearSync();
+    print("Clearing archive");
+    _archive = Archive();
   }
 }
