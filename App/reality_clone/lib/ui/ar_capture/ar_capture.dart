@@ -1,6 +1,7 @@
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:reality_clone/model/ar_manager.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
@@ -35,6 +36,7 @@ class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMix
     final capturedImage = await arManager.takeScreenshot(_repaintKey);
     if (capturedImage != null) {
       arCaptureNotifier.addCapturedImage(capturedImage);
+      HapticFeedback.vibrate();
     } else {
       throw Exception("stop");
     }
