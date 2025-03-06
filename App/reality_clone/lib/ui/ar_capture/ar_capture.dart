@@ -1,8 +1,10 @@
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:reality_clone/model/ar_manager.dart';
+import 'package:reality_clone/model/captured_image.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
 import 'package:reality_clone/ui/ar_capture/list_notification_button.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
@@ -16,23 +18,27 @@ class ArCapture extends StatefulWidget {
   State<ArCapture> createState() => _ArCaptureState();
 }
 
-class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMixin {
+class _ArCaptureState extends State<ArCapture>
+    with SingleTickerProviderStateMixin {
   final ArManager arManager = ArManager();
   final GlobalKey _repaintKey = GlobalKey();
+
   bool shouldExit = false;
   late Ticker _ticker;
 
   vector_math.Vector3 _currentPosition = vector_math.Vector3(0, 0, 0);
   vector_math.Vector3 _lastImagePosition = vector_math.Vector3(0, 0, 0);
-  double _currentSpeed=0;
-  double _currentDistance =0;
+  double _currentSpeed = 0;
+  double _currentDistance = 0;
   static const double MINIMAL_PICTURE_DISTANCE = 0.1;
   static const double MINIMAL_PICTURE_SPEED = 0.2;
   bool isAutoCaptureEnabled = false;
 
   void onCaptureButtonPressed() async {
+    HapticFeedback.vibrate();
     final arCaptureNotifier = context.read<ArCaptureNotifier>();
     final capturedImage = await arManager.takeScreenshot(_repaintKey);
+
     if (capturedImage != null) {
       arCaptureNotifier.addCapturedImage(capturedImage);
     } else {
@@ -49,34 +55,34 @@ class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMix
 
   Future<bool> _showExitConfirmationDialog() async {
     return await showDialog<bool>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text("Confirm"),
-              content: Text(
-                  "Are you sure you want to quit? All captured images will be lost."),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(false);
-                  },
-                  child: Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(true);
-                  },
-                  child: Text("Quit"),
-                ),
-              ],
-            );
-          },
-        ) ??
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm"),
+          content: Text(
+              "Are you sure you want to quit? All captured images will be lost."),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: Text("Quit"),
+            ),
+          ],
+        );
+      },
+    ) ??
         false;
   }
 
   void _onFrame(Duration elapsed) {
-    if(isAutoCaptureEnabled == false) {
+    if (isAutoCaptureEnabled == false) {
       return;
     }
 
@@ -85,12 +91,14 @@ class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMix
         final previousFramePosition = _currentPosition;
         _currentPosition = position.toVector3();
 
-        _currentSpeed = _currentPosition.distanceTo(previousFramePosition)*1000;
+        _currentSpeed =
+            _currentPosition.distanceTo(previousFramePosition) * 1000;
         _currentDistance = _currentPosition.distanceTo(_lastImagePosition);
       });
 
 
-      if(_currentDistance > MINIMAL_PICTURE_DISTANCE && _currentSpeed < MINIMAL_PICTURE_SPEED) {
+      if (_currentDistance > MINIMAL_PICTURE_DISTANCE &&
+          _currentSpeed < MINIMAL_PICTURE_SPEED) {
         setState(() {
           _lastImagePosition = _currentPosition;
         });
@@ -121,7 +129,7 @@ class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMix
       },
       child: Scaffold(
         appBar:
-            AppBar(title: Text('AR capture')),
+        AppBar(title: Text('AR capture')),
         body: Stack(
           children: [
             RepaintBoundary(
