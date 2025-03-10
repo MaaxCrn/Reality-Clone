@@ -2,15 +2,18 @@ import { spawn } from 'child_process';
 import fs from 'fs';
 
 import AdmZip from 'adm-zip';
+import { log } from 'console';
 import path from 'path';
 import portfinder from 'portfinder';
 import constants from '../config/constants';
 import { badRequest } from '../error/BadRequestError';
+import { notfound } from '../error/NotFoundRequestError';
+import FileHelper from '../helpers/FileHelper';
 import { GeneratedModelEntity } from '../models/GeneratedModel';
 import { WaitingModel } from '../models/WaitingModel';
 import { colmapService } from './ColmapService';
 
-const KEEP_FILES = false;
+const KEEP_FILES = constants.KEEP_FILES;
 
 export class ImageService {
     public async computeGaussianForFile(file: Express.Multer.File, projectName: string, useArPositions: boolean): Promise<string> {
@@ -28,8 +31,10 @@ export class ImageService {
             console.error('Erreur lors de la décompression :', error);
             throw new Error('Impossible de décompresser le fichier.');
         } finally {
-            fs.rm(file.path, () => {
-            });
+            if (!KEEP_FILES) {
+                fs.rm(file.path, () => {
+                });
+            }
         }
     }
 
@@ -48,10 +53,9 @@ export class ImageService {
 
         console.log('Commandes Colmap :', colmapCommands);
 
-
-        const query = ['activate', 'gaussian_splatting', '&&',
+        const query = ['activate', constants.GAUSSIAN_ENV.original, '&&',
             ...colmapCommands,
-            ' && ',
+            '&&',
             constants.LOCAL_PATHS.python, `${constants.LOCAL_PATHS.gaussianSplattingDirectory}\\train.py`,
             `-s "${path}"`,
             `--output_directory "${generationId}"`,
@@ -68,8 +72,10 @@ export class ImageService {
             console.log(`Sortie : ${data.toString()}`);
         });
 
-        process.on('close', (code) => {
+        process.on('close', (code, s) => {
             waitingModel.destroy();
+
+            log(code, s)
 
             if (code === 0) {
                 this.onGenerationSuccess(path, generationId, projectName);
@@ -132,13 +138,13 @@ export class ImageService {
         });
     }
 
-    public async getGeneratedModelById(id: number): Promise<GeneratedModelEntity | null> {
-        return await GeneratedModelEntity.findOne({
-            where: {
-                id,
-                userId: 1,
-            },
-        });
+    public async getGaussianPlyPaths(id: number): Promise<string[]> {
+        const entity = await this.getGeneratedModelById(id);
+        if (!entity) {
+            throw notfound('Model not found');
+        }
+
+        return FileHelper.getDescendantFiles(entity.plyDirectory, '.ply');
     }
 
     public async deleteGeneratedModelById(id: number): Promise<boolean> {
@@ -150,11 +156,10 @@ export class ImageService {
                     const directoryPath = path.resolve(model.plyDirectory);
 
                     try {
-                        await fs.access(directoryPath, () => {
+                        fs.accessSync(directoryPath);
+                        fs.rm(directoryPath, { recursive: true, force: true }, () => {
+                            console.log(`Dossier ${directoryPath} supprimé.`);
                         });
-                        await fs.rm(directoryPath, { recursive: true, force: true }, () => {
-                        });
-                        console.log(`Dossier ${directoryPath} supprimé.`);
                     } catch (err) {
                         console.warn(`Le dossier ${directoryPath} n'existe pas ou est déjà supprimé.`);
                     }
@@ -174,17 +179,14 @@ export class ImageService {
 
 
     public async getGaussianById(id: number): Promise<string | null> {
-
         const model = await this.getGeneratedModelById(id);
         const filePath = model?.plyDirectory;
 
-
-        if (filePath != null && fs.existsSync(filePath)) {
-
-            return filePath;
-        } else {
-            return null;
+        if (filePath == null || !fs.existsSync(filePath)) {
+            throw notfound('Directory not found');
         }
+
+        return filePath;
     }
 
     public async addGaussian(name: string, plyDirectory: string, image: string, userId: number) {
@@ -195,6 +197,15 @@ export class ImageService {
             public: true,
             userId,
             date: new Date(),
+        });
+    }
+
+    public async getGeneratedModelById(id: number): Promise<GeneratedModelEntity | null> {
+        return await GeneratedModelEntity.findOne({
+            where: {
+                id,
+                userId: 1,
+            },
         });
     }
 

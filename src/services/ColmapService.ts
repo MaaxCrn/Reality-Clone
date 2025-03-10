@@ -6,48 +6,64 @@ export class ColmapService {
 
     private getExtractFeaturesCommand(databasePath: string, imagesPath: string): string {
         return `${this.colmap} feature_extractor` +
-                    ` --database_path "${databasePath}"`+
-                    ` --image_path "${imagesPath}"`+
-                    ` --ImageReader.camera_model PINHOLE`+
-                    ` --ImageReader.single_camera 1`;
+            ` --database_path "${databasePath}"` +
+            ` --image_path "${imagesPath}"` +
+            ` --ImageReader.camera_model PINHOLE` +
+            ` --ImageReader.single_camera 1`;
     }
 
 
     private getMatchFeaturesCommand(databasePath: string, optimizeForVideo: boolean = false): string {
         return optimizeForVideo ?
-            `${this.colmap} sequential_matcher --database_path "${databasePath}"`:
+            `${this.colmap} sequential_matcher --database_path "${databasePath}"` :
             `${this.colmap} exhaustive_matcher --database_path "${databasePath}"`;
     }
 
     private getTriangulatePointsCommand(databasePath: string, imagesPath: string, sparsePath: string, allowRefineCameraIntrinsics: boolean = true): string {
         let command = `${this.colmap} mapper` +
-                                ` --database_path "${databasePath}"` +
-                                ` --image_path "${imagesPath}"` +
-                                ` --output_path "${sparsePath}"`;
+            ` --database_path "${databasePath}"` +
+            ` --image_path "${imagesPath}"` +
+            ` --output_path "${sparsePath}"`;
 
         if (!allowRefineCameraIntrinsics) {
-            command +=  ` --Mapper.ba_refine_focal_length 0` +
-                        ` --Mapper.ba_refine_principal_point 0` +
-                        ` --Mapper.ba_refine_extra_params 0`;
+            command += ` --Mapper.ba_refine_focal_length 0` +
+                ` --Mapper.ba_refine_principal_point 0` +
+                ` --Mapper.ba_refine_extra_params 0`;
         }
         return command;
     }
 
 
+    private getTriangulatePointsCommandFromAr(databasePath: string, imagesPath: string, sparsePath: string, outputPath: string): string {
+        let command = `${this.colmap} point_triangulator` +
+            ` --database_path "${databasePath}"` +
+            ` --image_path "${imagesPath}"` +
+            ` --input_path "${sparsePath}"` +
+            ` --output_path "${outputPath}"`;
+
+        return command;
+    }
+
     public getComputeSparseFromKnownPosesCommands(extractedFilePath: string): string[] {
         const imagePath = `${extractedFilePath}\\images`;
         const dbPath = `${extractedFilePath}\\database.db`;
+        const sparsePath = `${extractedFilePath}\\sparse`;
+        const zeroPath = `${sparsePath}\\0`;
+
+
+        const step2 = `mkdir ${zeroPath}`;
+
 
         //extract features to database
-        const step1 = this.getExtractFeaturesCommand(dbPath, imagePath);
+        const step3 = this.getExtractFeaturesCommand(dbPath, imagePath);
 
         //match features
-        const step2 = this.getMatchFeaturesCommand(dbPath);
+        const step4 = this.getMatchFeaturesCommand(dbPath);
 
         //triangulate points
-        const step3 = this.getTriangulatePointsCommand(dbPath, imagePath, `${extractedFilePath}\\sparse`, false);
+        const step5 = this.getTriangulatePointsCommandFromAr(dbPath, imagePath, sparsePath, zeroPath);
 
-        return [step1, '&&', step2, '&&', step3];
+        return [step2, '&&', step3, '&&', step4, '&&', step5];
     }
 
 

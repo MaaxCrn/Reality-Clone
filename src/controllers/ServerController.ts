@@ -1,4 +1,4 @@
-import path from "path";
+import path from 'path';
 import { Controller, Get, Route, Tags } from 'tsoa';
 
 

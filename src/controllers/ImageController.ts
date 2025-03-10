@@ -1,9 +1,11 @@
+import { log } from "console";
 import express from "express";
-import {Body, Controller, Delete, Get, Post, Request, Res, Route, Tags, TsoaResponse} from 'tsoa';
+import path from "path";
+import { Body, Controller, Delete, Get, Post, Request, Res, Route, Tags, TsoaResponse } from 'tsoa';
 import { upload } from '../config/multer';
 import { GeneratedModelDTO } from "../dto/generatedModel.dto";
+import { GeneratedModelAttributes } from "../models/GeneratedModel";
 import { imageService } from "../services/ImageService";
-import {GeneratedModelAttributes} from "../models/GeneratedModel";
 
 
 @Tags("Image")
@@ -73,10 +75,18 @@ export class ImageController extends Controller {
     }
   }
 
+  @Get("/download/{id}")
+  public async downloadGaussianById(@Request() request: express.Request, id: number) {
+    const res = request.res;
+    const files = await imageService.getGaussianPlyPaths(id);
+    log(path.resolve(files[files.length - 1]));
+    res?.sendFile(path.resolve(files[files.length - 1]));
+  }
+
 
   @Post("/add-gaussian")
   public async addGaussian(@Body() req: GeneratedModelAttributes): Promise<string> {
-    const {name, plyDirectory, image, userId}= req;
+    const { name, plyDirectory, image, userId } = req;
     await imageService.addGaussian(name, plyDirectory, image, userId);
     return "gg";
   }

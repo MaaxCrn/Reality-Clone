@@ -5,8 +5,7 @@ import { RegisterRoutes } from './routes';
 
 import swaggerUi from "swagger-ui-express";
 import errorHandler from './middlewares/errorHandler';
-import {User} from "./models/User";
-import sequelize from "./config/database";
+import { WaitingModel } from './models/WaitingModel';
 
 const app: Application = express();
 const port = 3000;
@@ -23,9 +22,10 @@ app.use(
   })
 );
 
-sequelize.sync({ force: true }).then(() => {
-  User.create({ mail: "admin", password: "admin", id: 1 });
-});
+// sequelize.sync({ force: true }).then(() => {
+//   User.create({ mail: "admin", password: "admin", id: 1 });
+// });
+WaitingModel.sync();
 
 RegisterRoutes(app);
 

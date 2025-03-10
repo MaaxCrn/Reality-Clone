@@ -287,6 +287,31 @@
 				]
 			}
 		},
+		"/image/download/{id}": {
+			"get": {
+				"operationId": "DownloadGaussianById",
+				"responses": {
+					"204": {
+						"description": "No content"
+					}
+				},
+				"tags": [
+					"Image"
+				],
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
 		"/image/add-gaussian": {
 			"post": {
 				"operationId": "AddGaussian",

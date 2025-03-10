@@ -9,6 +9,11 @@ export default {
         python: "python",
         colmap: "D:\\Mathis\\sae\\realityclonegithub\\libs\\colmap\\bin\\colmap",
         conda: "conda",
-        gaussianSplattingDirectory: "D:\\Mathis\\sae\\gaussian-splatting",
+        gaussianSplattingDirectory: "D:\\Mathis\\sae\\reduced-3dgs",
+    },
+    KEEP_FILES: false,
+    GAUSSIAN_ENV: {
+        optimized: "optimized_gaussian_splatting",
+        original: "gaussian_splatting",
     }
 }
