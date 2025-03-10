@@ -34,6 +34,15 @@ class AppRepository {
     }
   }
 
+  Future<void> editGaussianName(String id, String name) async {
+    try {
+      await apiProvider.editGaussianName(id, name);
+    } catch (e) {
+      print("Error editing Gaussian model name: $e");
+      throw Exception("Failed to edit Gaussian model name");
+    }
+  }
+
   Future<void> saveIP(String value) async {
     await preferencesDataSource.saveIP(value);
   }

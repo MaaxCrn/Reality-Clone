@@ -35,4 +35,25 @@ class HomePageNotifier extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> saveName(String id, String newName) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      await api.editGaussianName(id, newName);
+
+      final index = _models.indexWhere((model) => model.id == id);
+      if (index != -1) {
+        _models[index] = _models[index].copyWith(name: newName);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error updating name: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

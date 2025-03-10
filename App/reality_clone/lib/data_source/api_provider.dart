@@ -50,6 +50,9 @@ abstract class Api {
   @DELETE("image/delete/{id}")
   Future<HttpResponse> deleteGaussian(@Path("id") String id);
 
+  @POST("image/edit-name/{id}")
+  Future<HttpResponse> editGaussianName(@Path("id") String id, @Query("name") String name);
+
   @GET("/server/ping")
   Future<HttpResponse> ping();
 }
