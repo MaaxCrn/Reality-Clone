@@ -30,7 +30,7 @@ public class ModelLoader : MonoBehaviour
     {
         await APIManager.GetServerPath().ContinueWith((task) =>
         {
-            serverPath = task.Result;
+            serverPath = task.Result.Replace("\"", "");
         });
         updateModels();
     }
@@ -92,6 +92,9 @@ public class ModelLoader : MonoBehaviour
 
             for (int i = 0; i < gaussians.Length; ++i){
                 GaussianModelContainer model = new();
+                print(gaussians[i].PlyDirectory);
+                print(serverPath);
+                print(gaussians[i].PlyDirectory.Replace(".", serverPath) + "/point_cloud");
                 Dictionary<string, string> plyRecovery = genericPlyRecovery(gaussians[i].PlyDirectory.Replace(".", serverPath) + "/point_cloud");
 
                 model.title = gaussians[i].Name;
@@ -164,33 +167,15 @@ public class ModelLoader : MonoBehaviour
             listItem.title.text = gaussianModels[i].title;
         }
         NoModelLoaded.Invoke();
-
-        //models = new GaussianSplattingModel[modelList.Length];
-        //modelLock = new bool[modelList.Length];
-
-        //for (int i = 0; i < modelList.Length; ++i)
-        //{
-        //    modelLock[i] = false;
-        //}
-
-        //for (int i = 0; i < modelList.Length; ++i)
-        //{
-        //    ModelLoaderItem listItem = Instantiate(UIListItemPrefab, UIListElement);
-        //    listItem.index = i;
-        //    listItem.loader = this;
-        //    listItem.text.text = Path.GetFileName(modelList[i]);
-        //    listItem.image.sprite = LoadImageToUI(spriteList[i]);
-        //}
-
-        //NoModelLoaded.Invoke();
     }
 
     private Sprite LoadImageToUI(string path)
     {
+        path = path.Replace("./", serverPath+"/");
         if (File.Exists(path))
         {
             byte[] imageData = File.ReadAllBytes(path);
-            Texture2D texture = new Texture2D(2, 2);
+            Texture2D texture = new(2, 2);
             if (texture.LoadImage(imageData))
             {
                 Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));

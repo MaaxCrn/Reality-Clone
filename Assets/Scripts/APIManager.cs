@@ -4,11 +4,10 @@ using System.Threading.Tasks;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.IO;
-using UnityEngine;
 
 class APIManager
 {
-    private static readonly string API_URL = "http://192.168.65.29:3000";
+    private static readonly string API_URL = "http://localhost:3000";
 
     public static async Task<Gaussian[]> GetGaussians()
     {
@@ -23,29 +22,25 @@ class APIManager
 
     public static async Task<string> FetchApiDataAsync(string endpoint)
     {
-        using (HttpClient client = new HttpClient())
-        {
-            client.DefaultRequestHeaders.Add("User-Agent", "C# App");
+        using HttpClient client = new();
+        client.DefaultRequestHeaders.Add("User-Agent", "C# App");
 
-            try
-            {
-                HttpResponseMessage response = await client.GetAsync(API_URL + endpoint);
-                response.EnsureSuccessStatusCode();
-                return await response.Content.ReadAsStringAsync();
-            }
-            catch (HttpRequestException e)
-            {
-                throw new Exception("Erreur lors de l'exécution de la requête HTTP", e);
-            }
+        try
+        {
+            HttpResponseMessage response = await client.GetAsync(API_URL + endpoint);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync();
+        }
+        catch (HttpRequestException e)
+        {
+            throw new Exception("Erreur lors de l'exécution de la requête HTTP", e);
         }
     }
     private static T DeserializeJson<T>(string json)
     {
         var serializer = new DataContractJsonSerializer(typeof(T));
-        using (var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json)))
-        {
-            return (T)serializer.ReadObject(stream);
-        }
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
+        return (T)serializer.ReadObject(stream);
     }
 }
 
