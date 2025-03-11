@@ -15,7 +15,11 @@ import { colmapService } from './ColmapService';
 
 const KEEP_FILES = constants.KEEP_FILES;
 
+
 export class ImageService {
+
+    private map = new Map<number, string>();
+
     public async computeGaussianForFile(file: Express.Multer.File, projectName: string, useArPositions: boolean): Promise<string> {
         await this.checkValidity();
 
@@ -177,6 +181,17 @@ export class ImageService {
         return false;
     }
 
+    public async editName(id: number, newName: string): Promise<string> {
+        const model = await this.getGeneratedModelById(id);
+
+        if (!model) {
+            return notfound('Model not found');
+        }
+
+        model.name = newName;
+        await model.save();
+        return newName;
+    }
 
     public async getGaussianById(id: number): Promise<string | null> {
         const model = await this.getGeneratedModelById(id);

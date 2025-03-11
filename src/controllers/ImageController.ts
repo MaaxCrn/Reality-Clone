@@ -1,7 +1,7 @@
 import { log } from "console";
 import express from "express";
 import path from "path";
-import { Body, Controller, Delete, Get, Post, Request, Res, Route, Tags, TsoaResponse } from 'tsoa';
+import { Body, Controller, Delete, Get, Post, Query, Request, Res, Route, Tags, TsoaResponse } from 'tsoa';
 import { upload } from '../config/multer';
 import { GeneratedModelDTO } from "../dto/generatedModel.dto";
 import { GeneratedModelAttributes } from "../models/GeneratedModel";
@@ -83,6 +83,10 @@ export class ImageController extends Controller {
     res?.sendFile(path.resolve(files[files.length - 1]));
   }
 
+  @Post("/edit-name/{id}")
+  public async editName(@Query() name: string, id: number): Promise<string> {
+    return imageService.editName(id, name);
+  }
 
   @Post("/add-gaussian")
   public async addGaussian(@Body() req: GeneratedModelAttributes): Promise<string> {
