@@ -2,9 +2,9 @@
     <uses-sdk android:minSdkVersion="24"/>
 
     <application
-        android:label="reality_clone"
+        android:label="Reality Clone"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/app_icon">
 
         <activity
             android:name=".MainActivity"

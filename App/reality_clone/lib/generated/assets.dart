@@ -2,7 +2,7 @@
 class Assets {
   Assets._();
 
-  static const String assetsLogo = 'assets/Logo.png';
+  static const String assetsLogo = 'assets/llogo.png';
   static const String domainCapturedphoto = 'lib/domain/captured_image.dart';
   static const String generatedAssets = 'lib/generated/assets.dart';
   static const String libMain = 'lib/main.dart';
