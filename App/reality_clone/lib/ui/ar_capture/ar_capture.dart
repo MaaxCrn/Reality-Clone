@@ -34,9 +34,19 @@ class _ArCaptureState extends State<ArCapture>
   static const double MINIMAL_PICTURE_SPEED = 0.2;
   bool isAutoCaptureEnabled = false;
 
+  bool isShowArCamerasEnabled = false;
+
+
+  double quatX = 0.0;
+  double quatY = 0.0;
+  double quatZ = 0.0;
+  double quatW = 0.0;
+
   void onCaptureButtonPressed() async {
+    isShowArCamerasEnabled = false;
     HapticFeedback.vibrate();
     final arCaptureNotifier = context.read<ArCaptureNotifier>();
+    await arManager.hideAllNodes();
     final capturedImage = await arManager.takeScreenshot(_repaintKey);
 
     if (capturedImage != null) {
@@ -86,6 +96,17 @@ class _ArCaptureState extends State<ArCapture>
       return;
     }
 
+    arManager.getCameraPose().then((pose) {
+      final quat = pose.getRotation();
+      final quaternion = vector_math.Quaternion.fromRotation(quat);
+      setState(() {
+        quatX = quaternion.x;
+        quatY = quaternion.y;
+        quatZ = quaternion.z;
+        quatW = quaternion.w;
+      });
+    });
+
     arManager.getCameraPosition().then((position) {
       setState(() {
         final previousFramePosition = _currentPosition;
@@ -129,10 +150,38 @@ class _ArCaptureState extends State<ArCapture>
       },
       child: Scaffold(
         appBar:
-        AppBar(title: Text('AR capture')),
+        AppBar(
+            title: Text('AR capture'),
+            actions: [
+              Row(
+                children: [
+
+                  PopupMenuButton<String>(
+                    icon: const Icon(Icons.more_vert),
+                    onSelected: (value) {
+                      setState(() {
+                        if (value == "option1") isAutoCaptureEnabled = !isAutoCaptureEnabled;
+                        if (value == "option2") {
+                          isShowArCamerasEnabled = !isShowArCamerasEnabled;
+                          if (isShowArCamerasEnabled) {
+                            arManager.showAllNodes();
+                          } else {
+                            arManager.hideAllNodes();
+                          }
+                        }
+                      });
+                    },
+                    itemBuilder: (BuildContext context) => [
+                      _buildCheckedMenuItem("Auto capture", "option1", isAutoCaptureEnabled),
+                      _buildCheckedMenuItem("Show AR cameras", "option2", isShowArCamerasEnabled),
+                    ],
+                  ),
+                ],
+              )
+              ]),
         body: Stack(
           children: [
-            RepaintBoundary(
+              RepaintBoundary(
               key: _repaintKey,
               child: ARView(
                 onARViewCreated: arManager.onARViewCreated,
@@ -181,6 +230,12 @@ class _ArCaptureState extends State<ArCapture>
                     ),
 
 
+                    Text("x:$quatX"),
+                    Text("y:$quatY"),
+                    Text("z:$quatZ"),
+                    Text("w:$quatW"),
+
+
                   ],
                 ),
               ),
@@ -217,5 +272,37 @@ class _ArCaptureState extends State<ArCapture>
     context.read<ArCaptureNotifier>().clear();
     _ticker.dispose();
     super.dispose();
+  }
+
+
+
+  PopupMenuItem<String> _buildCheckedMenuItem(String title, String value, bool isChecked) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(title),
+          Checkbox(
+            value: isChecked,
+            onChanged: (bool? newValue) {
+              setState(() {
+                if (value == "option1") isAutoCaptureEnabled = newValue ?? false;
+                if (value == "option2") {
+                  isShowArCamerasEnabled = newValue ?? false;
+
+                  if (isShowArCamerasEnabled) {
+                    arManager.showAllNodes();
+                  } else {
+                    arManager.hideAllNodes();
+                  }
+                }
+              });
+              Navigator.pop(context); // Ferme le menu après sélection
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

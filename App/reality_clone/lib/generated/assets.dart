@@ -3,14 +3,7 @@ class Assets {
   Assets._();
 
   static const String assetsLogo = 'assets/Logo.png';
-  static const String domainCapturedphoto = 'lib/domain/captured_image.dart';
-  static const String generatedAssets = 'lib/generated/assets.dart';
-  static const String libMain = 'lib/main.dart';
-  static const String themeAppTheme = 'lib/theme/app_theme.dart';
-  static const String uiHomepage = 'lib/ui/homepage.dart';
-  static const String uiImagelistepage = 'lib/ui/imagelistepage.dart';
-  static const String uiLoginpage = 'lib/ui/loginpage.dart';
-  static const String uiPicturepage = 'lib/ui/picturepage.dart';
-  static const String uiSettingpage = 'lib/ui/settingpage.dart';
+  static const String modelsCamera = 'Models/camera.bin';
+  static const String realityCloneModelsCamera = 'Models/camera.gltf';
 
 }
