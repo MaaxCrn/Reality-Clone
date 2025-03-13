@@ -1,10 +1,10 @@
 import 'package:ar_flutter_plugin_flutterflow/widgets/ar_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:reality_clone/model/ar_manager.dart';
 import 'package:reality_clone/ui/ar_capture/ar_capture_picture_list.dart';
-import 'package:reality_clone/ui/ar_capture/list_notification_button.dart';
 import 'package:vector_math/vector_math_64.dart' as vector_math;
 
 import '../../domain/ar_capture_notifier.dart';
@@ -16,25 +16,35 @@ class ArCapture extends StatefulWidget {
   State<ArCapture> createState() => _ArCaptureState();
 }
 
-class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMixin {
+class _ArCaptureState extends State<ArCapture>
+    with SingleTickerProviderStateMixin {
   final ArManager arManager = ArManager();
   final GlobalKey _repaintKey = GlobalKey();
   bool shouldExit = false;
   late Ticker _ticker;
 
+  bool isSnackbarVisible = false;
+
   vector_math.Vector3 _currentPosition = vector_math.Vector3(0, 0, 0);
   vector_math.Vector3 _lastImagePosition = vector_math.Vector3(0, 0, 0);
-  double _currentSpeed=0;
-  double _currentDistance =0;
+  Stopwatch stopwatch = Stopwatch()..start();
+
+  vector_math.Vector3 _lastFramePosition = vector_math.Vector3(0, 0, 0);
+  double _currentSpeed = 0;
+  double _currentDistance = 0;
   static const double MINIMAL_PICTURE_DISTANCE = 0.1;
   static const double MINIMAL_PICTURE_SPEED = 0.2;
   bool isAutoCaptureEnabled = false;
 
   void onCaptureButtonPressed() async {
+    setState(() {
+      _lastImagePosition = _currentPosition;
+    });
     final arCaptureNotifier = context.read<ArCaptureNotifier>();
     final capturedImage = await arManager.takeScreenshot(_repaintKey);
     if (capturedImage != null) {
       arCaptureNotifier.addCapturedImage(capturedImage);
+      HapticFeedback.vibrate();
     } else {
       throw Exception("stop");
     }
@@ -76,25 +86,49 @@ class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMix
   }
 
   void _onFrame(Duration elapsed) {
-    if(isAutoCaptureEnabled == false) {
-      return;
-    }
-
     arManager.getCameraPosition().then((position) {
+      double deltaTime = stopwatch.elapsedMicroseconds / 1e6;
+
+      stopwatch.reset();
+
+      double distance = position.toVector3().distanceTo(_lastFramePosition);
+
       setState(() {
-        final previousFramePosition = _currentPosition;
         _currentPosition = position.toVector3();
 
-        _currentSpeed = _currentPosition.distanceTo(previousFramePosition)*1000;
+
+        if (deltaTime > 0) {
+          _currentSpeed = distance / deltaTime;
+        }
         _currentDistance = _currentPosition.distanceTo(_lastImagePosition);
+        _lastFramePosition = position.toVector3();
+
       });
 
-
-      if(_currentDistance > MINIMAL_PICTURE_DISTANCE && _currentSpeed < MINIMAL_PICTURE_SPEED) {
-        setState(() {
-          _lastImagePosition = _currentPosition;
-        });
+      if (isAutoCaptureEnabled &&
+          _currentDistance > MINIMAL_PICTURE_DISTANCE &&
+          _currentSpeed < MINIMAL_PICTURE_SPEED) {
         onCaptureButtonPressed();
+      }
+
+      if (_currentSpeed > 3 && isSnackbarVisible == false) {
+        isSnackbarVisible = true;
+
+        ScaffoldMessenger.of(context)
+            .showSnackBar(
+              SnackBar(
+                content: Text("Please avoid moving too fast"),
+                duration: Duration(seconds: 2),
+                action: SnackBarAction(
+                  label: "OK",
+                  onPressed: () {},
+                ),
+              ),
+            )
+            .closed
+            .then((reason) {
+          isSnackbarVisible = false;
+        });
       }
     });
   }
@@ -120,21 +154,19 @@ class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMix
         }
       },
       child: Scaffold(
-        appBar:
-            AppBar(
-                title: Text('AR capture'),
-                actions: [
-                  Text(
-                    arCaptureNotifier.pictureCount.toString(),
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-
-              ],
+        appBar: AppBar(
+          title: Text('AR capture'),
+          actions: [
+            Text(
+              arCaptureNotifier.pictureCount.toString(),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+            const SizedBox(width: 16),
+          ],
+        ),
         body: Stack(
           children: [
             RepaintBoundary(
@@ -152,63 +184,108 @@ class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMix
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Picture count: ${arCaptureNotifier.pictureCount}",
+                    Text(
+                      "Picture count: ${arCaptureNotifier.pictureCount}",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
-                    Text("Speed: ${_currentSpeed.toStringAsFixed(4)}",
+                    Text(
+                      "Speed: ${_currentSpeed.toStringAsFixed(4)}",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
-                    Text("Distance: ${_currentDistance.toStringAsFixed(4)}",
+                    Text(
+                      "Distance: ${_currentDistance.toStringAsFixed(4)}",
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
-                    Switch(
-                      value: isAutoCaptureEnabled,
-                      onChanged: (value) {
-                        setState(() {
-                          isAutoCaptureEnabled = value; // Update the state
-                        });
-                      },
+                    Column(
+                      children: [
+                        Text(
+                          "Auto-capture",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Switch(
+                          value: isAutoCaptureEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              isAutoCaptureEnabled = value; // Update the state
+                            });
+                          },
+                        ),
+                      ],
                     ),
-
-
                   ],
                 ),
               ),
             ),
             Positioned(
-              bottom: 20,
+              bottom: 0,
               left: 0,
               right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: onCaptureButtonPressed,
-                    style: ElevatedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      padding: const EdgeInsets.all(20),
+              child: Container(
+                padding: const EdgeInsets.only(top: 16, bottom: 32),
+                color: Colors.black54,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          "Auto-capture",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Switch(
+                          value: isAutoCaptureEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              isAutoCaptureEnabled = value; // Update the state
+                            });
+                          },
+                        ),
+                      ],
                     ),
-                    child: const Icon(Icons.camera_alt, size: 30),
-                  ),
-                  ListNotificationButton(
-                      initialNotificationCount: arCaptureNotifier.pictureCount,
-                      onPressed: onImageListButtonPressed),
-                ],
+                    ElevatedButton(
+                      onPressed: onCaptureButtonPressed,
+                      style: ElevatedButton.styleFrom(
+                        shape: const CircleBorder(),
+                        padding: const EdgeInsets.all(20),
+                      ),
+                      child: const Icon(Icons.camera_alt, size: 30),
+                    ),
+                    OutlinedButton(
+                      onPressed: onImageListButtonPressed,
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.white24,
+                        side: const BorderSide(color: Colors.white, width: 2),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 16),
+                      ),
+                      child: Icon(Icons.photo_library_outlined,
+                          color: Colors.white, size: 30),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
