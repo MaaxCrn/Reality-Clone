@@ -15,6 +15,7 @@ public class ModelLoader : MonoBehaviour
     public RectTransform UIListElement;
     public UnityEvent NoModelLoaded;
     public MeasureLine measureLine;
+    public Button refreshButton;
 
     delegate void InstanciateModel(int idx, bool value);
 
@@ -32,6 +33,20 @@ public class ModelLoader : MonoBehaviour
         {
             serverPath = task.Result.Replace("\"", "");
         });
+        updateModels();
+
+        if (refreshButton != null)
+        {
+            refreshButton.onClick.AddListener(UpdateModelButtonPressed);
+        }
+    }
+
+    public void UpdateModelButtonPressed()
+    {
+        foreach (Transform child in UIListElement)
+        {
+            Destroy(child.gameObject);
+        }
         updateModels();
     }
 
