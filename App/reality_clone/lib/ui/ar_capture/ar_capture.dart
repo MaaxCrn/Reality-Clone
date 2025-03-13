@@ -121,7 +121,20 @@ class _ArCaptureState extends State<ArCapture> with SingleTickerProviderStateMix
       },
       child: Scaffold(
         appBar:
-            AppBar(title: Text('AR capture')),
+            AppBar(
+                title: Text('AR capture'),
+                actions: [
+                  Text(
+                    arCaptureNotifier.pictureCount.toString(),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+
+              ],
+            ),
         body: Stack(
           children: [
             RepaintBoundary(
